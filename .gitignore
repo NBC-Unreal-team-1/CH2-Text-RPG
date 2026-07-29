@@ -72,19 +72,3 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
-
-# Visual Studio 찌꺼기 파일 및 빌드 결과물
-.vs/
-x64/
-Debug/
-Release/
-*.log
-*.tlog
-*.lastbuildstate
-*.aps
-*.ilk
-*.pdb
-*.obj
-*.pch
-*.ipch
-*.vcxproj.user
