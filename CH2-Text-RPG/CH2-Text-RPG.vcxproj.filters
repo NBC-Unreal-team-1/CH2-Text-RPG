@@ -104,5 +104,8 @@
     <ClCompile Include="RecipeManager.cpp">
       <Filter>Recipe</Filter>
     </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
