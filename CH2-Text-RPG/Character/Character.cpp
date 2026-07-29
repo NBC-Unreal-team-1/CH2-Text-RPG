@@ -6,60 +6,84 @@ Character::Character()
 
 Character::~Character()
 {
-    // TODO: Implement character destruction.
 }
 
 const std::string& Character::GetName() const
 {
-    // TODO: Return the character name.
     return Name;
 }
 
 void Character::SetName(const std::string& name)
 {
-    // TODO: Set the character name.
+    Name = name;
 }
 
 int Character::GetLevel() const
 {
-    // TODO: Return the character level.
-    return {};
+    return Level;
 }
 
 void Character::SetLevel(int level)
 {
-    // TODO: Set the character level.
+    Level = level;
 }
 
 int Character::GetMaxHp() const
 {
-    // TODO: Return the character maximum HP.
-    return {};
+    return MaxHp;
 }
 
 void Character::SetMaxHp(int maxHp)
 {
-    // TODO: Set the character maximum HP.
+    MaxHp = maxHp;
 }
 
 int Character::GetCurrentHp() const
 {
-    // TODO: Return the character current HP.
-    return {};
+    return CurrentHp;
 }
 
 void Character::SetCurrentHp(int currentHp)
 {
-    // TODO: Set the character current HP.
+    CurrentHp = currentHp;
 }
 
-int Character::GetAttack() const
+int Character::GetMaxMp() const
 {
-    // TODO: Return the character attack.
-    return {};
+    return MaxHp;
 }
 
-void Character::SetAttack(int attack)
+void Character::SetMaxMp(int maxMp)
 {
-    // TODO: Set the character attack.
+    MaxMp = maxMp;
+}
+
+int Character::GetCurrentMp() const
+{
+    return CurrentMp;
+}
+
+void Character::SetCurrentMp(int currentMp)
+{
+    CurrentMp = currentMp;
+}
+
+int Character::GetPower() const
+{
+    return Power;
+}
+
+void Character::SetPower(int power)
+{
+    Power = power;
+}
+
+int Character::GetDefence() const
+{
+    return Defence;
+}
+
+void Character::SetDefence(int defence)
+{
+    Defence = defence;
 }
