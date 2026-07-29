@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="BattleInfo.h" />
     <ClInclude Include="Battle\BattleManager.h" />
     <ClInclude Include="Battle\BattleResult.h" />
     <ClInclude Include="Character\Character.h" />
