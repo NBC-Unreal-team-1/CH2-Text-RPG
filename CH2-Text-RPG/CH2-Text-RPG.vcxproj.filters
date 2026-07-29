@@ -19,33 +19,93 @@
     <Filter Include="Core">
       <UniqueIdentifier>{F6873039-A37C-49BD-A1A1-FB25502BE2C2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Recipe">
+      <UniqueIdentifier>{4e086c5b-9723-4a1e-b4fa-ef033d61ce2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Character\Character.h"><Filter>Character</Filter></ClInclude>
-    <ClInclude Include="Character\Player.h"><Filter>Character</Filter></ClInclude>
-    <ClInclude Include="Character\Monster.h"><Filter>Character</Filter></ClInclude>
-    <ClInclude Include="Battle\BattleManager.h"><Filter>Battle</Filter></ClInclude>
-    <ClInclude Include="Battle\BattleResult.h"><Filter>Battle</Filter></ClInclude>
-    <ClInclude Include="Inventory\Inventory.h"><Filter>Inventory</Filter></ClInclude>
-    <ClInclude Include="Inventory\Item.h"><Filter>Inventory</Filter></ClInclude>
-    <ClInclude Include="Inventory\Potion.h"><Filter>Inventory</Filter></ClInclude>
-    <ClInclude Include="Inventory\AttackPotion.h"><Filter>Inventory</Filter></ClInclude>
-    <ClInclude Include="Shop\ShopManager.h"><Filter>Shop</Filter></ClInclude>
-    <ClInclude Include="Log\LogManager.h"><Filter>Log</Filter></ClInclude>
-    <ClInclude Include="Core\GameManager.h"><Filter>Core</Filter></ClInclude>
+    <ClInclude Include="Character\Character.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Character\Player.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Character\Monster.h">
+      <Filter>Character</Filter>
+    </ClInclude>
+    <ClInclude Include="Battle\BattleManager.h">
+      <Filter>Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="Battle\BattleResult.h">
+      <Filter>Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory\Inventory.h">
+      <Filter>Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory\Item.h">
+      <Filter>Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory\Potion.h">
+      <Filter>Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory\AttackPotion.h">
+      <Filter>Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="Shop\ShopManager.h">
+      <Filter>Shop</Filter>
+    </ClInclude>
+    <ClInclude Include="Log\LogManager.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GameManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="RecipeManager.h">
+      <Filter>Recipe</Filter>
+    </ClInclude>
+    <ClInclude Include="Recipe.h">
+      <Filter>Recipe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Character\Character.cpp"><Filter>Character</Filter></ClCompile>
-    <ClCompile Include="Character\Player.cpp"><Filter>Character</Filter></ClCompile>
-    <ClCompile Include="Character\Monster.cpp"><Filter>Character</Filter></ClCompile>
-    <ClCompile Include="Battle\BattleManager.cpp"><Filter>Battle</Filter></ClCompile>
-    <ClCompile Include="Battle\BattleResult.cpp"><Filter>Battle</Filter></ClCompile>
-    <ClCompile Include="Inventory\Inventory.cpp"><Filter>Inventory</Filter></ClCompile>
-    <ClCompile Include="Inventory\Item.cpp"><Filter>Inventory</Filter></ClCompile>
-    <ClCompile Include="Inventory\Potion.cpp"><Filter>Inventory</Filter></ClCompile>
-    <ClCompile Include="Inventory\AttackPotion.cpp"><Filter>Inventory</Filter></ClCompile>
-    <ClCompile Include="Shop\ShopManager.cpp"><Filter>Shop</Filter></ClCompile>
-    <ClCompile Include="Log\LogManager.cpp"><Filter>Log</Filter></ClCompile>
-    <ClCompile Include="Core\GameManager.cpp"><Filter>Core</Filter></ClCompile>
+    <ClCompile Include="Character\Character.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="Character\Player.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="Character\Monster.cpp">
+      <Filter>Character</Filter>
+    </ClCompile>
+    <ClCompile Include="Battle\BattleManager.cpp">
+      <Filter>Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="Battle\BattleResult.cpp">
+      <Filter>Battle</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory\Inventory.cpp">
+      <Filter>Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory\Item.cpp">
+      <Filter>Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory\Potion.cpp">
+      <Filter>Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory\AttackPotion.cpp">
+      <Filter>Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="Shop\ShopManager.cpp">
+      <Filter>Shop</Filter>
+    </ClCompile>
+    <ClCompile Include="Log\LogManager.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\GameManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="RecipeManager.cpp">
+      <Filter>Recipe</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
