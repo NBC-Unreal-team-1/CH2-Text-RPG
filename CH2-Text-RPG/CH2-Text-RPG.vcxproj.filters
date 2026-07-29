@@ -48,9 +48,6 @@
     <ClInclude Include="Inventory\Potion.h">
       <Filter>Inventory</Filter>
     </ClInclude>
-    <ClInclude Include="Inventory\AttackPotion.h">
-      <Filter>Inventory</Filter>
-    </ClInclude>
     <ClInclude Include="Shop\ShopManager.h">
       <Filter>Shop</Filter>
     </ClInclude>
@@ -90,9 +87,6 @@
       <Filter>Inventory</Filter>
     </ClCompile>
     <ClCompile Include="Inventory\Potion.cpp">
-      <Filter>Inventory</Filter>
-    </ClCompile>
-    <ClCompile Include="Inventory\AttackPotion.cpp">
       <Filter>Inventory</Filter>
     </ClCompile>
     <ClCompile Include="Shop\ShopManager.cpp">

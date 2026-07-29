@@ -1,4 +1,5 @@
 #include "Inventory.h"
+#include "Item.h"
 
 Inventory::Inventory()
 {
@@ -6,26 +7,30 @@ Inventory::Inventory()
 
 Inventory::~Inventory()
 {
-    // TODO: Implement inventory destruction.
+
 }
 
-void Inventory::AddItem(Item* item)
+void Inventory::AddItem(std::unique_ptr<Item> Item)
 {
-    // TODO: Add an item.
+
 }
 
-void Inventory::RemoveItem(Item* item)
+void Inventory::RemoveItem(int ItemId)
 {
     // TODO: Remove an item.
 }
 
-void Inventory::UseItem(Item* item, Player& player)
+void Inventory::UseItem(Item& Item, Player& player)
 {
     // TODO: Use an item.
 }
 
-const std::vector<Item*>& Inventory::GetItems() const
+const std::vector<std::unique_ptr<Item>>& Inventory::GetItems() const
 {
-    // TODO: Return inventory items.
     return Items;
+}
+
+Item* Inventory::FindItem(int ItemId) const
+{
+    return nullptr;
 }

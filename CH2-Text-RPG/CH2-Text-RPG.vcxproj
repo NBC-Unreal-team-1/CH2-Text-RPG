@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -137,7 +137,6 @@
     <ClInclude Include="Character\Monster.h" />
     <ClInclude Include="Character\Player.h" />
     <ClInclude Include="Core\GameManager.h" />
-    <ClInclude Include="Inventory\AttackPotion.h" />
     <ClInclude Include="Inventory\Inventory.h" />
     <ClInclude Include="Inventory\Item.h" />
     <ClInclude Include="Inventory\Potion.h" />
@@ -153,7 +152,6 @@
     <ClCompile Include="Character\Monster.cpp" />
     <ClCompile Include="Character\Player.cpp" />
     <ClCompile Include="Core\GameManager.cpp" />
-    <ClCompile Include="Inventory\AttackPotion.cpp" />
     <ClCompile Include="Inventory\Inventory.cpp" />
     <ClCompile Include="Inventory\Item.cpp" />
     <ClCompile Include="Inventory\Potion.cpp" />

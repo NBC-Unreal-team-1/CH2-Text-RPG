@@ -1,2 +1,15 @@
-﻿  RecipeManager.cpp
-  CH2-Text-RPG.vcxproj -> C:\Users\pc\OneDrive\Documents\GitHub\CH1\CH2-Text-RPG\x64\Debug\CH2-Text-RPG.lib
+﻿  BattleManager.cpp
+  BattleResult.cpp
+  Character.cpp
+  Monster.cpp
+  Player.cpp
+  GameManager.cpp
+  Inventory.cpp
+  Item.cpp
+  Potion.cpp
+  LogManager.cpp
+  RecipeManager.cpp
+  ShopManager.cpp
+  코드를 생성하고 있습니다...
+MSVCRTD.lib(exe_main.obj) : error LNK2019: main"int __cdecl invoke_main(void)" (?invoke_main@@YAHXZ) 함수에서 참조되는 확인할 수 없는 외부 기호
+C:\Users\이서준\source\repos\Test.cpp\CH2-Text-RPG\CH2-Text-RPG\x64\Debug\CH2-Text-RPG.exe : fatal error LNK1120: 1개의 확인할 수 없는 외부 참조입니다.
