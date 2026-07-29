@@ -12,7 +12,7 @@ enum class PotionType
 class Potion : public Item
 {
 public:
-    Potion(int id, PotionType type, int amount);
+    Potion(int Id, PotionType Type, int Amount);
     virtual ~Potion();
 
     //포션 사용
@@ -24,6 +24,6 @@ public:
 
 protected:
 private:
-    PotionType type;
-    int amount;
+    PotionType Type;
+    int Amount;
 };

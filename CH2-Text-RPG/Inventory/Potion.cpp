@@ -1,8 +1,7 @@
 #include "Potion.h"
 
-Potion::Potion()
-{
-}
+Potion::Potion(int Id, PotionType Type, int Amount)
+    : Item(Id), Type(Type), Amount(Amount) {}
 
 Potion::~Potion()
 {
@@ -12,4 +11,14 @@ Potion::~Potion()
 void Potion::Use(Player& player)
 {
     // TODO: Use the potion.
+}
+
+PotionType Potion::GetType() const
+{
+    return this->Type;
+}
+
+int Potion::GetAmount() const
+{
+    return this->Amount;
 }

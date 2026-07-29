@@ -7,7 +7,7 @@ class Player;
 class Item
 {
 public:
-    Item(int id, std::string name);
+    Item(int Id);
     virtual ~Item();
 
     //ID¿Í ÀÌ¸§ Get
@@ -18,6 +18,6 @@ public:
     virtual void Use(Player& player) = 0;
 
 protected:
-    int id;
-    std::string name;
+    int Id;
+    std::string Name;
 };
