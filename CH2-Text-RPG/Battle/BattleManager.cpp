@@ -1,4 +1,7 @@
 #include "BattleManager.h"
+#include "../Character/Player.h"
+#include "../Character/Monster.h"
+
 
 BattleManager::BattleManager()
 {
@@ -6,11 +9,10 @@ BattleManager::BattleManager()
 
 BattleManager::~BattleManager()
 {
-    // TODO: Implement battle manager destruction.
+   
 }
 
-BattleResult BattleManager::StartBattle(Player& player)
+void BattleManager::StartBattle(Player& player,Monster monster)
 {
-    // TODO: Start a battle.
-    return {};
+   
 }
