@@ -63,6 +63,9 @@
     <ClInclude Include="Recipe.h">
       <Filter>Recipe</Filter>
     </ClInclude>
+    <ClInclude Include="BattleInfo.h">
+      <Filter>Battle</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Character\Character.cpp">
