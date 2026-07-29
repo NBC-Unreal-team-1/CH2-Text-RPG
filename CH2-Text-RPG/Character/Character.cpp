@@ -50,7 +50,7 @@ void Character::SetCurrentHp(int currentHp)
 
 int Character::GetMaxMp() const
 {
-    return MaxHp;
+    return MaxMp;
 }
 
 void Character::SetMaxMp(int maxMp)
