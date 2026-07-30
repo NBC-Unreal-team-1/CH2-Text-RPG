@@ -14,6 +14,7 @@ Monster::Monster(MonsterType SelectedMonsterType)
 Monster::~Monster()
 {
 }
+
 void Monster::GenerateStat()
 {
     switch (MonsterId)
@@ -26,6 +27,9 @@ void Monster::GenerateStat()
         SetPower(8);
         SetDefence(0);
         DropGold = 5;
+
+        DropIngredientId = 100;
+        DropIngredientAmount = 1;
         break;
 
     case MonsterType::Onion:
@@ -36,6 +40,9 @@ void Monster::GenerateStat()
         SetPower(12);
         SetDefence(3);
         DropGold = 10;
+
+        DropIngredientId = 101;
+        DropIngredientAmount = 1;
         break;
 
     case MonsterType::Pickle:
@@ -46,6 +53,9 @@ void Monster::GenerateStat()
         SetPower(16);
         SetDefence(5);
         DropGold = 15;
+
+        DropIngredientId = 102;
+        DropIngredientAmount = 1;
         break;
 
     default:
@@ -61,4 +71,14 @@ MonsterType Monster::GetMonsterId() const
 int Monster::GetDropGold() const
 {
     return DropGold;
+}
+
+int Monster::GetDropIngredientId() const
+{
+    return DropIngredientId;
+}
+
+int Monster::GetDropIngredientAmount() const
+{
+    return DropIngredientAmount;
 }

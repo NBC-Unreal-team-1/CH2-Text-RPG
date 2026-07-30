@@ -28,9 +28,15 @@ public:
     MonsterType GetMonsterId() const;
     int GetDropGold() const;
 
+    int GetDropIngredientId() const;
+    int GetDropIngredientAmount() const;
+
 protected:
     
 private:
     MonsterType MonsterId = MonsterType::Lettuce;
     int DropGold = 0;
+
+    int DropIngredientId = 0;
+    int DropIngredientAmount = 0;
 };
