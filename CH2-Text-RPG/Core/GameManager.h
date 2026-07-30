@@ -3,6 +3,7 @@
 #include "../Battle/BattleManager.h"
 #include "../Log/LogManager.h"
 #include "../Shop/ShopManager.h"
+#include "../UI/UIManager.h"
 
 class GameManager
 {
@@ -19,4 +20,5 @@ private:
     BattleManager Battle;
     ShopManager Shop;
     LogManager Log;
+    UIManager UI;
 };

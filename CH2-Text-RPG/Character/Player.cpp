@@ -11,24 +11,22 @@ Player::~Player()
 
 int Player::GetExp() const
 {
-    // TODO: Return player experience.
-    return {};
+    return Exp;
 }
 
 void Player::SetExp(int exp)
 {
-    // TODO: Set player experience.
+    Exp = exp;
 }
 
 int Player::GetGold() const
 {
-    // TODO: Return player gold.
-    return {};
+    return Gold;
 }
 
 void Player::SetGold(int gold)
 {
-    // TODO: Set player gold.
+    Gold = gold;
 }
 
 Inventory& Player::GetInventory()

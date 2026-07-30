@@ -4,7 +4,11 @@
 
 void MoveCursor(int X, int Y)
 {
-    COORD Pos = { X, Y };
+    COORD Pos =
+    {
+        static_cast<SHORT>(X),
+        static_cast<SHORT>(Y)
+    };
     SetConsoleCursorPosition(
         GetStdHandle(STD_OUTPUT_HANDLE),
         Pos
