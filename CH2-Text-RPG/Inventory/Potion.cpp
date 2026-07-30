@@ -28,18 +28,44 @@ Potion::Potion(int Id, PotionType Type, int Amount)
 
 Potion::~Potion()
 {
-    // TODO: Implement potion destruction.
 }
 
 std::unique_ptr<Potion> Potion::CreateById(int Id)
 {
-    //TODO: ID로 포션 만들기
-    return nullptr;
+    const auto& table = GetPotionTable();
+
+    //포션 테이블에서 Id를 통해 위치 찾기
+    auto it = std::find_if(table.begin(), table.end(),
+        [Id](const std::pair<int, PotionData>& entry)
+        {
+            return entry.first == Id;
+        });
+
+    if (it == table.end())
+        return nullptr; // 이 Id는 포션이 아님
+
+    return std::make_unique<Potion>(Id, it->second.Type, it->second.Amount); //유니크 포인터로 포션 객체 생성
 }
 
 void Potion::Use(Player& player)
 {
-    // TODO: 포션 타입에 따라 다르게
+    switch (Type)
+    {
+    case PotionType::Health:
+    {
+        int newHp = player.GetCurrentHp() + GetAmount();
+        newHp = std::min(newHp, player.GetMaxHp()); // 최대치 초과 방지
+        player.SetCurrentHp(newHp);
+        break;
+    }
+
+    case PotionType::Mana:
+        int newMp = player.GetCurrentMp() + GetAmount();
+        newMp = std::min(newMp, player.GetMaxMp()); // 최대치 초과 방지
+        player.SetCurrentHp(newMp);
+        break;
+        break;
+    }
 }
 
 PotionType Potion::GetType() const
