@@ -146,6 +146,7 @@
     <ClInclude Include="Recipe\RecipeManager.h" />
     <ClInclude Include="Shop\ShopManager.h" />
     <ClInclude Include="UI\ConsoleUtils.h" />
+    <ClInclude Include="UI\ScreenData.h" />
     <ClInclude Include="UI\UIManager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +164,7 @@
     <ClCompile Include="Recipe\RecipeManager.cpp" />
     <ClCompile Include="Shop\ShopManager.cpp" />
     <ClCompile Include="UI\ConsoleUtils.cpp" />
+    <ClCompile Include="UI\ScreenData.cpp" />
     <ClCompile Include="UI\UIManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

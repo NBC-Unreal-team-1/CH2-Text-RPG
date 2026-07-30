@@ -22,7 +22,7 @@ void WaitOutputDelay(int time = 300, int count = 3)
 	std::cout << std::endl;
 }
 
-int UIManager::GetInt() const
+int GetInt()
 {
 	int in;
 	while (true)
@@ -37,9 +37,19 @@ int UIManager::GetInt() const
 	}
 }
 
-void UIManager::PrintMessage(const std::string& message) const
+int UIManager::GetInput(ScreenData& screen, int min, int max) const
 {
-	// TODO: Print a message.
+	int result;
+	while (true)
+	{
+		screen.MoveToInputPos();
+		result = GetInt();
+		if (result <= max && result >= min)
+		{
+			break;
+		}
+	}
+	return result;
 }
 
 void UIManager::SetupPlayerInfo(Player& player)
@@ -57,6 +67,31 @@ void UIManager::SetupPlayerInfo(Player& player)
 	player.SetMaxHp(maxHp);
 	player.SetCurrentHp(maxHp);
 	player.SetPower(power);
+}
+
+int UIManager::PrintMenu()
+{
+	int result;
+	ScreenData menu;
+	menu.AddLine(border, LineType::out);
+	menu.AddLine(emptyLine, LineType::out);
+	menu.AddLine("1. 여행을 떠나요 즐거운 마음으로 황금빛 태양 축제를 여는~", LineType::out);
+	menu.AddLine(emptyLine, LineType::out);
+	menu.AddLine("Enter : ", LineType::in);
+	int menuMin = 1;
+	int menuMax = 1;
+
+	for (int i = 0; i < menu.GetDataSize(); ++i)
+	{
+		menu.PrintLine(i);
+	}
+
+	if (!menu.GetHasInput())
+	{
+		return -1;
+	}
+
+	return GetInput(menu, menuMin, menuMax);
 }
 
 void UIManager::PrintBattleLog(

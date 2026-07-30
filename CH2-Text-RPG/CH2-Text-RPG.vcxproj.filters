@@ -72,6 +72,9 @@
     <ClInclude Include="UI\ConsoleUtils.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="UI\ScreenData.h">
+      <Filter>UI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Character\Character.cpp">
@@ -117,6 +120,9 @@
       <Filter>Inventory</Filter>
     </ClCompile>
     <ClCompile Include="UI\ConsoleUtils.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\ScreenData.cpp">
       <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
