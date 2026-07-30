@@ -18,7 +18,7 @@ public:
         Player& player,
         Monster monster
     );
-    void CearBattleInfos();
+    void ClearBattleInfos();
   
 
 protected:

@@ -43,7 +43,7 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     return { BattleResult::Lose, BattleInfos};
 }
 
-void BattleManager::CearBattleInfos()
+void BattleManager::ClearBattleInfos()
 {
     BattleInfos.clear();
 }
