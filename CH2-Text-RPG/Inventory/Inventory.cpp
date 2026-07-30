@@ -7,12 +7,17 @@ Inventory::Inventory()
 
 Inventory::~Inventory()
 {
-
 }
 
 void Inventory::AddItem(std::unique_ptr<Item> Item)
 {
+    if (Item == nullptr)
+    {
+        return;
+    }
 
+    //유니크 포인터 소유권 이전(Item->Inventory)
+    Items.push_back(std::move(Item));
 }
 
 void Inventory::RemoveItem(int ItemId)

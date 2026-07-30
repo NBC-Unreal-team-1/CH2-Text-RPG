@@ -9,7 +9,6 @@ Item::Item(int Id)
 
 Item::~Item()
 {
-    // TODO: Implement item destruction.
 }
 
 int Item::GetId() const
