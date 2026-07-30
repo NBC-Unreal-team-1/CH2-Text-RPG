@@ -22,10 +22,7 @@ void GameManager::Run()
 void GameManager::GameLoop()
 {
     Player player;
-    player.SetName("Player");
-    player.SetMaxHp(30);
-    player.SetCurrentHp(30);
-    player.SetPower(7);
+    UI.SetupPlayerInfo(player);
 
     Monster monster;
     monster.SetName("Training Monster");

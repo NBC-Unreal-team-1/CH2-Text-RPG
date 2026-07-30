@@ -3,7 +3,7 @@
 #include <string>
 
 void MoveCursor(int X, int Y);
-std::string ClearLine();
+void ClearLine(int x, int y);
 void ClearConsole();
 void FlushInput();
 std::string ClearToEndOfLine(int X);

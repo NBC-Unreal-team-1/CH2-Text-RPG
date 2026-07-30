@@ -1,6 +1,7 @@
 #include "ConsoleUtils.h"
 #include <Windows.h>
 #include <cstdlib>
+#include <iostream>
 
 void MoveCursor(int X, int Y)
 {
@@ -15,14 +16,16 @@ void MoveCursor(int X, int Y)
     );
 }
 
-std::string ClearLine()
+void ClearLine(int x = 0, int y = 0)
 {
+    MoveCursor(x, y);
     std::string Temp;
     for (int i = 0; i < 80; ++i)
     {
         Temp += ' ';
     }
-    return Temp;
+    std::cout << Temp;
+    MoveCursor(x, y);
 }
 
 void ClearConsole()

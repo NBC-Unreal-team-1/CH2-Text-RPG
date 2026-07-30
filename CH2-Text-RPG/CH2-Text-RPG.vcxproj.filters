@@ -13,9 +13,6 @@
     <Filter Include="Shop">
       <UniqueIdentifier>{5922E5B4-B2C6-470C-B722-C134874EF0AF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Log">
-      <UniqueIdentifier>{D7736985-2B66-46AE-A79C-17610BC60976}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core">
       <UniqueIdentifier>{F6873039-A37C-49BD-A1A1-FB25502BE2C2}</UniqueIdentifier>
     </Filter>
@@ -54,12 +51,6 @@
     <ClInclude Include="Shop\ShopManager.h">
       <Filter>Shop</Filter>
     </ClInclude>
-    <ClInclude Include="Log\LogManager.h">
-      <Filter>Log</Filter>
-    </ClInclude>
-    <ClInclude Include="Log\ConsoleUtils.h">
-      <Filter>Log</Filter>
-    </ClInclude>
     <ClInclude Include="Core\GameManager.h">
       <Filter>Core</Filter>
     </ClInclude>
@@ -77,6 +68,9 @@
     </ClInclude>
     <ClInclude Include="Inventory\Ingredient.h">
       <Filter>Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\ConsoleUtils.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,12 +101,6 @@
     <ClCompile Include="Shop\ShopManager.cpp">
       <Filter>Shop</Filter>
     </ClCompile>
-    <ClCompile Include="Log\LogManager.cpp">
-      <Filter>Log</Filter>
-    </ClCompile>
-    <ClCompile Include="Log\ConsoleUtils.cpp">
-      <Filter>Log</Filter>
-    </ClCompile>
     <ClCompile Include="Core\GameManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
@@ -127,6 +115,9 @@
     </ClCompile>
     <ClCompile Include="Inventory\Ingredient.cpp">
       <Filter>Inventory</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\ConsoleUtils.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
