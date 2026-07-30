@@ -1,14 +1,17 @@
 #pragma once
 #include <string>
+#include <memory>
 
 class Player;
 
-//요리 재료 객체
 class Item
 {
 public:
     Item(int Id);
     virtual ~Item();
+
+    //아이템 생성
+    static std::unique_ptr<Item> CreateItem(int ItemId);
 
     //ID와 이름 Get
     int GetId() const;

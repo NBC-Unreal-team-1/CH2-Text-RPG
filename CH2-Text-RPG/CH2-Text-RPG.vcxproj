@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -138,6 +138,7 @@
     <ClInclude Include="Character\Monster.h" />
     <ClInclude Include="Character\Player.h" />
     <ClInclude Include="Core\GameManager.h" />
+    <ClInclude Include="Inventory\Ingredient.h" />
     <ClInclude Include="Inventory\Inventory.h" />
     <ClInclude Include="Inventory\Item.h" />
     <ClInclude Include="Inventory\Potion.h" />
@@ -155,6 +156,7 @@
     <ClCompile Include="Character\Monster.cpp" />
     <ClCompile Include="Character\Player.cpp" />
     <ClCompile Include="Core\GameManager.cpp" />
+    <ClCompile Include="Inventory\Ingredient.cpp" />
     <ClCompile Include="Inventory\Inventory.cpp" />
     <ClCompile Include="Inventory\Item.cpp" />
     <ClCompile Include="Inventory\Potion.cpp" />
