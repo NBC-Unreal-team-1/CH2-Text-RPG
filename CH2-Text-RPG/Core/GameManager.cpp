@@ -1,11 +1,9 @@
 #include "GameManager.h"
 
-#include "../Character/Monster.h"
-#include "../Character/Player.h"
-
 #include <iostream>
 
 GameManager::GameManager()
+    : RandomEngine(std::random_device{}())
 {
 }
 
@@ -16,43 +14,84 @@ GameManager::~GameManager()
 
 void GameManager::Run()
 {
+    InitializePlayer();
+    RunTutorial();
     GameLoop();
+}
+
+void GameManager::InitializePlayer()
+{
+    UI.SetupPlayerInfo(PlayerCharacter);
+    PlayerCharacter.SetLevel(1);
+    PlayerCharacter.SetMaxHp(100);
+    PlayerCharacter.SetCurrentHp(100);
+    PlayerCharacter.SetPower(30);
+    PlayerCharacter.SetDefence(0);
+    PlayerCharacter.SetGold(0);
+}
+
+void GameManager::RunTutorial()
+{
+    std::uniform_int_distribution<int> BattleCountDistribution(3, 4);
+    const int BattleCount = BattleCountDistribution(RandomEngine);
+
+    std::cout << "\n=== Tutorial Start ===\n";
+    std::cout << "Tutorial Battles: " << BattleCount << "\n\n";
+
+    for (int BattleIndex = 0; BattleIndex < BattleCount; ++BattleIndex)
+    {
+        Monster CurrentMonster = CreateRandomTutorialMonster();
+
+        std::cout << "=== Battle "
+                  << BattleIndex + 1 << " / " << BattleCount
+                  << " ===\n";
+        std::cout << PlayerCharacter.GetName() << " HP: "
+                  << PlayerCharacter.GetCurrentHp() << '/'
+                  << PlayerCharacter.GetMaxHp() << '\n';
+        std::cout << CurrentMonster.GetName() << " HP: "
+                  << CurrentMonster.GetCurrentHp() << '/'
+                  << CurrentMonster.GetMaxHp() << "\n\n";
+
+        const auto BattleResultData =
+            Battle.StartBattle(PlayerCharacter, CurrentMonster);
+
+        UI.PrintBattleLog(BattleResultData);
+
+        if (BattleResultData.first == BattleResult::Lose)
+        {
+            std::cout << "\nTutorial Failed.\n";
+            return;
+        }
+
+        ApplyBattleReward(CurrentMonster);
+
+        std::cout << "Gold Reward: "
+                  << CurrentMonster.GetDropGold() << '\n';
+        std::cout << "Total Gold: "
+                  << PlayerCharacter.GetGold() << "\n\n";
+
+        PlayerCharacter.SetCurrentHp(
+            PlayerCharacter.GetMaxHp()
+        );
+    }
+
+    std::cout << "=== Tutorial Complete ===\n";
+}
+
+Monster GameManager::CreateRandomTutorialMonster()
+{
+    std::uniform_int_distribution<int> MonsterDistribution(0, 2);
+    const int MonsterIndex = MonsterDistribution(RandomEngine);
+
+    return Monster(static_cast<MonsterType>(MonsterIndex));
+}
+
+void GameManager::ApplyBattleReward(const Monster& monster)
+{
+    PlayerCharacter.AddGold(monster.GetDropGold());
 }
 
 void GameManager::GameLoop()
 {
-    Player player;
-    UI.SetupPlayerInfo(player);
-
-    Monster monster;
-    monster.SetName("Training Monster");
-    monster.SetMaxHp(20);
-    monster.SetCurrentHp(20);
-    monster.SetPower(4);
-
-    Battle.ClearBattleInfos();
-
-    std::cout << "=== Battle Start ===\n";
-    std::cout << player.GetName() << " HP: "
-              << player.GetCurrentHp() << '/' << player.GetMaxHp() << '\n';
-    std::cout << monster.GetName() << " HP: "
-              << monster.GetCurrentHp() << '/' << monster.GetMaxHp() << "\n\n";
-
-    const auto [result, battleInfos] = Battle.StartBattle(player, monster);
-
-    for (std::size_t index = 0; index < battleInfos.size(); ++index)
-    {
-        const BattleInfo& battleInfo = battleInfos[index];
-
-        std::cout << "Turn " << index + 1 << '\n';
-        std::cout << "  Player damage: " << battleInfo.AttackDamage << '\n';
-        std::cout << "  Monster damage: " << battleInfo.GetDamage << '\n';
-    }
-
-    std::cout << '\n';
-    std::cout << "Battle Result: "
-              << (result == BattleResult::Win ? "Win" : "Lose")
-              << '\n';
-    std::cout << "Player Remaining HP: "
-              << player.GetCurrentHp() << '\n';
+    // TODO: Implement the main game loop.
 }
