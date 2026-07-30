@@ -16,6 +16,8 @@ public:
     UIManager();
     ~UIManager();
 
+    int GetInt() const;
+
     void PrintMessage(const std::string& message) const;
     void SetupPlayerInfo(Player& player);
     void PrintBattleLog(
