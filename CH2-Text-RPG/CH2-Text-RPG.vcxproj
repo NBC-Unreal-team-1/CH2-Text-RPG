@@ -142,11 +142,10 @@
     <ClInclude Include="Inventory\Inventory.h" />
     <ClInclude Include="Inventory\Item.h" />
     <ClInclude Include="Inventory\Potion.h" />
-    <ClInclude Include="Log\LogManager.h" />
-    <ClInclude Include="Log\ConsoleUtils.h" />
     <ClInclude Include="Recipe\Recipe.h" />
     <ClInclude Include="Recipe\RecipeManager.h" />
     <ClInclude Include="Shop\ShopManager.h" />
+    <ClInclude Include="UI\ConsoleUtils.h" />
     <ClInclude Include="UI\UIManager.h" />
   </ItemGroup>
   <ItemGroup>
@@ -160,11 +159,10 @@
     <ClCompile Include="Inventory\Inventory.cpp" />
     <ClCompile Include="Inventory\Item.cpp" />
     <ClCompile Include="Inventory\Potion.cpp" />
-    <ClCompile Include="Log\LogManager.cpp" />
-    <ClCompile Include="Log\ConsoleUtils.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Recipe\RecipeManager.cpp" />
     <ClCompile Include="Shop\ShopManager.cpp" />
+    <ClCompile Include="UI\ConsoleUtils.cpp" />
     <ClCompile Include="UI\UIManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
