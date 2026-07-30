@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
+#include <utility>
 #include <vector>
 #include <iostream>
 #include <Windows.h>
@@ -17,7 +18,9 @@ public:
 
     void PrintMessage(const std::string& message) const;
     void SetupPlayerInfo(Player& player);
-    void PrintBattleLog(const std::pair<BattleResult, std::vector<BattleInfo>> Result) const;
+    void PrintBattleLog(
+        const std::pair<BattleResult, std::vector<BattleInfo>>& Result
+    ) const;
 
 protected:
 private:

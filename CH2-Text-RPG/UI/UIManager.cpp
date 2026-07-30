@@ -1,4 +1,4 @@
-#include "UIManager.h"
+癤�#include "UIManager.h"
 
 UIManager::UIManager()
 {
@@ -31,7 +31,29 @@ void UIManager::SetupPlayerInfo(Player& player)
     player.SetPower(power);
 }
 
-void UIManager::PrintBattleLog(const std::pair<BattleResult, std::vector<BattleInfo>> Result) const
+void UIManager::PrintBattleLog(
+    const std::pair<BattleResult, std::vector<BattleInfo>>& Result
+) const
 {
-    // 전투 전체 정보 받아와서 분리 및 출력
+    const std::vector<BattleInfo>& BattleLogs = Result.second;
+
+    for (std::size_t Index = 0; Index < BattleLogs.size(); ++Index)
+    {
+        const BattleInfo& CurrentLog = BattleLogs[Index];
+
+        std::cout << "Turn " << Index + 1 << '\n';
+        std::cout << "  Player Damage: "
+                  << CurrentLog.AttackDamage << '\n';
+        std::cout << "  Monster Damage: "
+                  << CurrentLog.GetDamage << '\n';
+        std::cout << "  Player HP: "
+                  << CurrentLog.PlayerHP << '\n';
+        std::cout << "  Monster HP: "
+                  << CurrentLog.MonsterHP << '\n';
+    }
+
+    std::cout << '\n';
+    std::cout << "Battle Result: "
+              << (Result.first == BattleResult::Win ? "Win" : "Lose")
+              << '\n';
 }
