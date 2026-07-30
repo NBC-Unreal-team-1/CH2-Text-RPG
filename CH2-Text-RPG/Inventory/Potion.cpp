@@ -34,6 +34,7 @@ Potion::~Potion()
 std::unique_ptr<Potion> Potion::CreateById(int Id)
 {
     //TODO: ID로 포션 만들기
+    return nullptr;
 }
 
 void Potion::Use(Player& player)
