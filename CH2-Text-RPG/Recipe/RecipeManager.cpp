@@ -208,11 +208,6 @@ const std::vector<Recipe>& RecipeManager::GetRecipes() const
     return Recipes;
 }
 
-const std::vector<Recipe>& RecipeManager::GetRecipes() const
-{
-    return Recipes;
-}
-
 std::vector<const Recipe*> RecipeManager::GetAllRecipes() const
 {
     std::vector<const Recipe*> AllRecipes;
