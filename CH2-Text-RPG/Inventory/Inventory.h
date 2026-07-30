@@ -21,10 +21,10 @@ public:
     // 아이템 사용
     void UseItem(Item& Item, Player& player);
 
-    // 읽기 전용 접근
+    // 인벤토리 전체 Get
     const std::vector<std::unique_ptr<Item>>& GetItems() const;
 
-    // id로 아이템 찾기 (없으면 nullptr)
+    // Id로 아이템 찾기 (없으면 nullptr)
     Item* FindItem(int ItemId) const;
 
 protected:
