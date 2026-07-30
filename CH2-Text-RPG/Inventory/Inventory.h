@@ -21,7 +21,7 @@ public:
     void AddItem(int ItemId, int Count = 1);
 
     // 아이템 제거
-    void RemoveItem(int ItemId, int Count = 1);
+    bool RemoveItem(int ItemId, int Count = 1);
 
     // 아이템 사용
     void UseItem(int ItemId, Player& player);
