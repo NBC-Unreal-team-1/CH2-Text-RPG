@@ -16,7 +16,7 @@ public:
     ~BattleManager();
     std::pair<BattleResult, std::vector<BattleInfo>> StartBattle(
         Player& player,
-        Monster monster
+        Monster& monster
     );
     void ClearBattleInfos();
   
