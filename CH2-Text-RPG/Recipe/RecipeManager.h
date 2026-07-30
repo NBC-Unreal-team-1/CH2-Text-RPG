@@ -8,22 +8,41 @@
 class RecipeManager
 {
 public:
+    // 생성자
     RecipeManager();
 
 public:
+    // 일반 레시피 목록 반환
     const std::vector<Recipe>& GetRecipes() const;
 
+    // 일반 레시피와 해금된 특수 레시피 반환
     std::vector<const Recipe*> GetAllRecipes() const;
 
+    // 레시피 ID로 검색
     const Recipe* FindRecipeByID(int RecipeID) const;
 
-    std::vector<const Recipe*> SearchRecipe(
+    // 레시피 이름 일부로 검색
+    std::vector<const Recipe*> SearchRecipes(
         const std::string& Keyword
     ) const;
 
+    // 음식 제작 완료 처리
+    bool CompleteRecipe(int RecipeID);
+
+    // 음식 섭취 완료 처리
+    bool EatRecipe(int RecipeID);
+
 private:
+    // 일반 음식 10개를 모두 먹었는지 확인
+    bool AreAllNormalRecipesEaten() const;
+
+private:
+    // 일반 레시피 10개
     std::vector<Recipe> Recipes;
 
+    // 일반 음식 10개를 모두 먹으면 해금
     Recipe FinalBurger;
-    Recipe Potato;
+
+    // 궁극의 햄버거를 제작하면 해금
+    Recipe FrenchFrie;
 };
