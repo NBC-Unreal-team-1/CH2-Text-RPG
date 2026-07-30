@@ -203,3 +203,8 @@ RecipeManager::RecipeManager()
         false
     };
 }
+
+const std::vector<Recipe>& RecipeManager::GetRecipes() const
+{
+    return Recipes;
+}
