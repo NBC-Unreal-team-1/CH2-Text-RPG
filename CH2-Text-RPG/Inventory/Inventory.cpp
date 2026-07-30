@@ -60,11 +60,23 @@ bool Inventory::RemoveItem(int ItemId, int Count)
     return true;
 }
 
-void Inventory::UseItem(int ItemId, Player& player)
+bool Inventory::UseItem(int ItemId, Player& player)
 {
-    //TODO: 아이템 효과 적용, 수량 차감
+    InventorySlot* slot = FindSlot(ItemId); //Id로 인벤토리에 있는 아이템 검색
+
+    if (slot == nullptr)
+    {
+        return false; // 없는 아이템은 사용 불가
+    }
+
+    slot->ItemPtr->Use(player); // 효과 적용
+
+    RemoveItem(ItemId, 1);      // 사용한 만큼 수량 차감
+
+    return true;
 }
 
+//모든 아이템들 반환
 const std::vector<InventorySlot>& Inventory::GetItems() const
 {
     return Items;
@@ -97,6 +109,9 @@ const InventorySlot* Inventory::FindSlot(int ItemId) const
 
 int Inventory::GetItemCount(int ItemId) const
 {
-    //TODO: 아이템 카운트 반환
-    return 0;
+    //아이템이 존재하는지 찾기
+    const InventorySlot* slot = FindSlot(ItemId);
+
+    //아이템이 존재하면 Count 반환.
+    return (slot != nullptr) ? slot->Count : 0;
 }

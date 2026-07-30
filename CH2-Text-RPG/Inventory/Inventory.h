@@ -24,7 +24,7 @@ public:
     bool RemoveItem(int ItemId, int Count = 1);
 
     // 아이템 사용
-    void UseItem(int ItemId, Player& player);
+    bool UseItem(int ItemId, Player& player);
 
     // 인벤토리 전체 Get
     const std::vector<InventorySlot>& GetItems() const;
