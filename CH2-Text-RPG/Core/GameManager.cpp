@@ -11,7 +11,7 @@ GameManager::~GameManager()
 
 void GameManager::Run()
 {
-    // TODO: Run the game.
+    GameLoop();
 }
 
 void GameManager::GameLoop()

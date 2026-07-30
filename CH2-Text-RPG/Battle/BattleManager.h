@@ -1,39 +1,26 @@
 #pragma once
-#include <vector>
-#include <iostream>
-#include <string>
+
+#include "BattleInfo.h"
 #include "BattleResult.h"
+
+#include <utility>
+#include <vector>
+
 class Player;
 class Monster;
+
 class BattleManager
 {
 public:
     BattleManager();
     ~BattleManager();
 
-    std::pair<BattleResult,std::vector<BattleInfo>> StartBattle(Player& player,Monster monster);
-
-
-
-    void Attack();
-    //공격(행동)
-
-
-    void Skill();
-    //스킬로 공격(행동,마나부족시 행동 X)
-
-    
-
-    bool IsBattleEnd();
-    //전투 종료
-
-
+    std::pair<BattleResult, std::vector<BattleInfo>> StartBattle(
+        Player& player,
+        Monster& monster
+    );
 
 protected:
-
-
 private:
-
     std::vector<BattleInfo> BattleInfos;
-
 };

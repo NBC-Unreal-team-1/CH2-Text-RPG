@@ -22,6 +22,9 @@
     <Filter Include="Recipe">
       <UniqueIdentifier>{4e086c5b-9723-4a1e-b4fa-ef033d61ce2d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{7680E293-3683-45D8-9ADB-C5FD5BE791E6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Character\Character.h">
@@ -54,17 +57,23 @@
     <ClInclude Include="Log\LogManager.h">
       <Filter>Log</Filter>
     </ClInclude>
+    <ClInclude Include="Log\ConsoleUtils.h">
+      <Filter>Log</Filter>
+    </ClInclude>
     <ClInclude Include="Core\GameManager.h">
       <Filter>Core</Filter>
     </ClInclude>
-    <ClInclude Include="RecipeManager.h">
+    <ClInclude Include="Recipe\RecipeManager.h">
       <Filter>Recipe</Filter>
     </ClInclude>
-    <ClInclude Include="Recipe.h">
+    <ClInclude Include="Recipe\Recipe.h">
       <Filter>Recipe</Filter>
     </ClInclude>
-    <ClInclude Include="BattleInfo.h">
+    <ClInclude Include="Battle\BattleInfo.h">
       <Filter>Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="UI\UIManager.h">
+      <Filter>UI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -98,14 +107,20 @@
     <ClCompile Include="Log\LogManager.cpp">
       <Filter>Log</Filter>
     </ClCompile>
+    <ClCompile Include="Log\ConsoleUtils.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
     <ClCompile Include="Core\GameManager.cpp">
       <Filter>Core</Filter>
     </ClCompile>
-    <ClCompile Include="RecipeManager.cpp">
+    <ClCompile Include="Recipe\RecipeManager.cpp">
       <Filter>Recipe</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="UI\UIManager.cpp">
+      <Filter>UI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -27,13 +27,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -46,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -131,7 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BattleInfo.h" />
+    <ClInclude Include="Battle\BattleInfo.h" />
     <ClInclude Include="Battle\BattleManager.h" />
     <ClInclude Include="Battle\BattleResult.h" />
     <ClInclude Include="Character\Character.h" />
@@ -142,9 +142,11 @@
     <ClInclude Include="Inventory\Item.h" />
     <ClInclude Include="Inventory\Potion.h" />
     <ClInclude Include="Log\LogManager.h" />
-    <ClInclude Include="Recipe.h" />
-    <ClInclude Include="RecipeManager.h" />
+    <ClInclude Include="Log\ConsoleUtils.h" />
+    <ClInclude Include="Recipe\Recipe.h" />
+    <ClInclude Include="Recipe\RecipeManager.h" />
     <ClInclude Include="Shop\ShopManager.h" />
+    <ClInclude Include="UI\UIManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Battle\BattleManager.cpp" />
@@ -157,9 +159,11 @@
     <ClCompile Include="Inventory\Item.cpp" />
     <ClCompile Include="Inventory\Potion.cpp" />
     <ClCompile Include="Log\LogManager.cpp" />
+    <ClCompile Include="Log\ConsoleUtils.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="RecipeManager.cpp" />
+    <ClCompile Include="Recipe\RecipeManager.cpp" />
     <ClCompile Include="Shop\ShopManager.cpp" />
+    <ClCompile Include="UI\UIManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
