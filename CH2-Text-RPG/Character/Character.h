@@ -19,6 +19,9 @@ public:
      int GetCurrentHp() const;
     void SetCurrentHp(int currentHp);
 
+    void TakeDamage(int damage);
+    bool IsAlive() const;
+
     int GetMaxMp() const; // MP
     void SetMaxMp(int maxMp);
     int GetCurrentMp() const;

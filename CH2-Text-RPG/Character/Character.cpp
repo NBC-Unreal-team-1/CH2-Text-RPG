@@ -45,6 +45,12 @@ int Character::GetCurrentHp() const
 
 void Character::SetCurrentHp(int currentHp)
 {
+    if (currentHp < 0)
+    {
+        CurrentHp = 0;
+        return;
+    }
+
     CurrentHp = currentHp;
 }
 
@@ -86,4 +92,19 @@ int Character::GetDefence() const
 void Character::SetDefence(int defence)
 {
     Defence = defence;
+}
+
+void Character::TakeDamage(int damage)
+{
+    if (damage < 0)
+    {
+        return;
+    }
+
+    SetCurrentHp(CurrentHp - damage);
+}
+
+bool Character::IsAlive() const
+{
+    return CurrentHp > 0;
 }
