@@ -13,9 +13,9 @@ const std::string& Character::GetName() const
     return Name;
 }
 
-void Character::SetName(const std::string& name)
+void Character::SetName(const std::string& Name)
 {
-    Name = name;
+    this->Name = Name;
 }
 
 int Character::GetLevel() const
@@ -23,9 +23,9 @@ int Character::GetLevel() const
     return Level;
 }
 
-void Character::SetLevel(int level)
+void Character::SetLevel(int Level)
 {
-    Level = level;
+    this->Level = Level;
 }
 
 int Character::GetMaxHp() const
@@ -33,9 +33,9 @@ int Character::GetMaxHp() const
     return MaxHp;
 }
 
-void Character::SetMaxHp(int maxHp)
+void Character::SetMaxHp(int MaxHp)
 {
-    MaxHp = maxHp;
+    this->MaxHp = MaxHp;
 }
 
 int Character::GetCurrentHp() const
@@ -43,15 +43,15 @@ int Character::GetCurrentHp() const
     return CurrentHp;
 }
 
-void Character::SetCurrentHp(int currentHp)
+void Character::SetCurrentHp(int CurrentHp)
 {
-    if (currentHp < 0)
+    if (CurrentHp < 0)
     {
-        CurrentHp = 0;
+        this->CurrentHp = 0;
         return;
     }
 
-    CurrentHp = currentHp;
+    this->CurrentHp = CurrentHp;
 }
 
 int Character::GetMaxMp() const
@@ -59,9 +59,9 @@ int Character::GetMaxMp() const
     return MaxMp;
 }
 
-void Character::SetMaxMp(int maxMp)
+void Character::SetMaxMp(int MaxMp)
 {
-    MaxMp = maxMp;
+    this->MaxMp = MaxMp;
 }
 
 int Character::GetCurrentMp() const
@@ -69,9 +69,9 @@ int Character::GetCurrentMp() const
     return CurrentMp;
 }
 
-void Character::SetCurrentMp(int currentMp)
+void Character::SetCurrentMp(int CurrentMp)
 {
-    CurrentMp = currentMp;
+    this->CurrentMp = CurrentMp;
 }
 
 int Character::GetPower() const
@@ -79,9 +79,9 @@ int Character::GetPower() const
     return Power;
 }
 
-void Character::SetPower(int power)
+void Character::SetPower(int Power)
 {
-    Power = power;
+    this->Power = Power;
 }
 
 int Character::GetDefence() const
@@ -89,19 +89,19 @@ int Character::GetDefence() const
     return Defence;
 }
 
-void Character::SetDefence(int defence)
+void Character::SetDefence(int Defence)
 {
-    Defence = defence;
+    this->Defence = Defence;
 }
 
-void Character::TakeDamage(int damage)
+void Character::TakeDamage(int Damage)
 {
-    if (damage < 0)
+    if (Damage < 0)
     {
         return;
     }
 
-    SetCurrentHp(CurrentHp - damage);
+    SetCurrentHp(CurrentHp - Damage);
 }
 
 bool Character::IsAlive() const
