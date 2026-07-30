@@ -9,9 +9,6 @@ class RecipeManager
 public:
     RecipeManager();
 
-public:
-    const std::vector<Recipe>& GetRecipes() const;
-
 private:
     std::vector<Recipe> Recipes;
 
