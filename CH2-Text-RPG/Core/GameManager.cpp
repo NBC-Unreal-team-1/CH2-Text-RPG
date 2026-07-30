@@ -32,6 +32,8 @@ void GameManager::InitializePlayer()
 
 void GameManager::RunTutorial()
 {
+    UI.PrintMenu();
+
     std::uniform_int_distribution<int> BattleCountDistribution(3, 4);
     const int BattleCount = BattleCountDistribution(RandomEngine);
 

@@ -9,6 +9,7 @@
 #include "../Battle/BattleInfo.h"
 #include "../Battle/BattleResult.h"
 #include "../Character/Player.h"
+#include "../UI/ScreenData.h"
 
 class UIManager
 {
@@ -16,14 +17,15 @@ public:
     UIManager();
     ~UIManager();
 
-    int GetInt() const;
-
-    void PrintMessage(const std::string& message) const;
+    int GetInput(ScreenData& screen, int min, int max) const;
     void SetupPlayerInfo(Player& player);
+    int PrintMenu();
     void PrintBattleLog(
         const std::pair<BattleResult, std::vector<BattleInfo>>& Result
     ) const;
 
 protected:
 private:
+    std::string border = "========================================";
+    std::string emptyLine = " ";
 };
