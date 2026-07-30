@@ -12,26 +12,26 @@ public:
     void SetName(const std::string& name);
 
     int GetLevel() const; // Level
-    void SetLevel(int level);
+    void SetLevel(int Level);
 
     int GetMaxHp() const; // HP
-    void SetMaxHp(int maxHp);
-     int GetCurrentHp() const;
-    void SetCurrentHp(int currentHp);
+    void SetMaxHp(int MaxHp);
+    int GetCurrentHp() const;
+    void SetCurrentHp(int CurrentHp);
 
-    void TakeDamage(int damage);
+    void TakeDamage(int Damage);
     bool IsAlive() const;
 
     int GetMaxMp() const; // MP
-    void SetMaxMp(int maxMp);
+    void SetMaxMp(int MaxMp);
     int GetCurrentMp() const;
-    void SetCurrentMp(int currentMp);
+    void SetCurrentMp(int CurrentMp);
 
     int GetPower() const; // Power
-    void SetPower(int power);
+    void SetPower(int Power);
 
     int GetDefence() const; // Defence
-    void SetDefence(int defence);
+    void SetDefence(int Defence);
 
 protected:
     std::string Name;

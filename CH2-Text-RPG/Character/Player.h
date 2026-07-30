@@ -10,9 +10,10 @@ public:
     ~Player() override;
 
     int GetExp() const;
-    void SetExp(int exp);
+    void SetExp(int Exp);
     int GetGold() const;
-    void SetGold(int gold);
+    void SetGold(int Gold);
+    void AddGold(int Gold);
     Inventory& GetInventory();
     const Inventory& GetInventory() const;
 

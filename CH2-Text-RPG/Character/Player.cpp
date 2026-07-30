@@ -14,9 +14,9 @@ int Player::GetExp() const
     return Exp;
 }
 
-void Player::SetExp(int exp)
+void Player::SetExp(int Exp)
 {
-    Exp = exp;
+    this->Exp = Exp;
 }
 
 int Player::GetGold() const
@@ -24,9 +24,18 @@ int Player::GetGold() const
     return Gold;
 }
 
-void Player::SetGold(int gold)
+void Player::SetGold(int Gold)
 {
-    Gold = gold;
+    this->Gold = Gold;
+}
+
+void Player::AddGold(int Gold)
+{
+    if (Gold <= 0)
+    {
+        return;
+    }
+    this->Gold += Gold;
 }
 
 Inventory& Player::GetInventory()
