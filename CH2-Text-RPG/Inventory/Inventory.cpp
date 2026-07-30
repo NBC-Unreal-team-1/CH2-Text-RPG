@@ -61,4 +61,5 @@ const InventorySlot* Inventory::FindSlot(int ItemId) const
 int Inventory::GetItemCount(int ItemId) const
 {
     //TODO: 아이템 카운트 반환
+    return 0;
 }

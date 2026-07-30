@@ -75,6 +75,9 @@
     <ClInclude Include="UI\UIManager.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Inventory\Ingredient.h">
+      <Filter>Inventory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Character\Character.cpp">
@@ -121,6 +124,9 @@
     </ClCompile>
     <ClCompile Include="UI\UIManager.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory\Ingredient.cpp">
+      <Filter>Inventory</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
