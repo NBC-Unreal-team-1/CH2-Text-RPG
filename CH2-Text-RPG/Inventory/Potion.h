@@ -15,6 +15,9 @@ public:
     Potion(int Id, PotionType Type, int Amount);
     virtual ~Potion();
 
+    //Id로 포션 생성
+    static std::unique_ptr<Potion> CreateById(int Id);
+
     //포션 사용
     void Use(Player& player) override;
 
