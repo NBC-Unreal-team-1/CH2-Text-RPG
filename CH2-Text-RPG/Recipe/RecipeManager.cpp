@@ -207,3 +207,75 @@ const std::vector<Recipe>& RecipeManager::GetRecipes() const
 {
     return Recipes;
 }
+
+const std::vector<Recipe>& RecipeManager::GetRecipes() const
+{
+    return Recipes;
+}
+
+std::vector<const Recipe*> RecipeManager::GetAllRecipes() const
+{
+    std::vector<const Recipe*> AllRecipes;
+
+    for (const Recipe& CurrentRecipe : Recipes)
+    {
+        AllRecipes.push_back(&CurrentRecipe);
+    }
+
+    AllRecipes.push_back(&FinalBurger);
+    AllRecipes.push_back(&Potato);
+
+    return AllRecipes;
+}
+
+const Recipe* RecipeManager::FindRecipeByID(
+    int RecipeID
+) const
+{
+    for (const Recipe& CurrentRecipe : Recipes)
+    {
+        if (CurrentRecipe.Id == RecipeID)
+        {
+            return &CurrentRecipe;
+        }
+    }
+
+    if (FinalBurger.Id == RecipeID)
+    {
+        return &FinalBurger;
+    }
+
+    if (Potato.Id == RecipeID)
+    {
+        return &Potato;
+    }
+
+    return nullptr;
+}
+
+std::vector<const Recipe*> RecipeManager::SearchRecipe(
+    const std::string& Keyword
+) const
+{
+    std::vector<const Recipe*> SearchResults;
+
+    for (const Recipe& CurrentRecipe : Recipes)
+    {
+        if (CurrentRecipe.Name.find(Keyword) != std::string::npos)
+        {
+            SearchResults.push_back(&CurrentRecipe);
+        }
+    }
+
+    if (FinalBurger.Name.find(Keyword) != std::string::npos)
+    {
+        SearchResults.push_back(&FinalBurger);
+    }
+
+    if (Potato.Name.find(Keyword) != std::string::npos)
+    {
+        SearchResults.push_back(&Potato);
+    }
+
+    return SearchResults;
+}
