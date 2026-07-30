@@ -18,11 +18,10 @@ public:
         Player& player,
         Monster& monster
     );
-    void ClearBattleInfos();
   
 
 protected:
 private:
     std::vector<BattleInfo> BattleInfos;
-   
+    void ClearBattleInfos();
 };

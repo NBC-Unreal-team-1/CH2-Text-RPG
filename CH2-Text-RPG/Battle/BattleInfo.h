@@ -3,19 +3,32 @@
 
 struct BattleInfo
 {
-    int GetDamage = 0;
-    int AttackDamage = 0;
-    std::string SkillName;
-    int PlayerHP = 0;
-    int MonsterHP = 0;
 
-    BattleInfo(std::string skillName,int attackDamage, int getDamage,int playerHP,int monsterHP)
+    std::string SkillName;
+
+    int Turn = 0;
+
+    int MonsterAttackDamage = 0;
+
+    int PlayerAttackDamage = 0;
+
+    int PlayerRemainingHP = 0;
+
+    int MonsterRemainingHP = 0;
+
+    BattleInfo(int turn, std::string skillName,int attackDamage, int getDamage,int playerHP,int monsterHP)
     {
+        this->Turn = turn;
+
         this->SkillName = skillName;
-        this->GetDamage = getDamage;
-        this->AttackDamage = attackDamage;
-        this->PlayerHP = playerHP;
-        this->MonsterHP = monsterHP;
+
+        this->MonsterAttackDamage = getDamage;
+
+        this->PlayerAttackDamage = attackDamage;
+
+        this->PlayerRemainingHP = playerHP;
+
+        this->MonsterRemainingHP = monsterHP;
 
     }
 };
