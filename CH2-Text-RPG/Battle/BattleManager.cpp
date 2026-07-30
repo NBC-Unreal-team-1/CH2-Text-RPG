@@ -11,39 +11,40 @@ BattleManager::~BattleManager()
 {
     // TODO: Implement battle manager destruction.
 }
+void BattleManager::ClearBattleInfos()
+{
+    BattleInfos.clear();
+}
 
 std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     Player& player,
-    Monster monster
+    Monster& monster
 )
 {
+    ClearBattleInfos();
     while (player.GetCurrentHp() > 0 and monster.GetCurrentHp() > 0)
     {
         if (player.GetPower() <= 0)
         {
-            return { BattleResult::Lose, BattleInfos };;
+            return { BattleResult::Lose, BattleInfos };
         }
         monster.TakeDamage(player.GetPower());
         if (monster.GetCurrentHp() <= 0)
         {
-            BattleInfo a(0, player.GetPower(), "Attack");
-            BattleInfos.push_back(a);
+            BattleInfo PlayerWin("Attack", player.GetPower(), 0, player.GetCurrentHp(), monster.GetCurrentHp());
+            BattleInfos.push_back(PlayerWin);
             return { BattleResult::Win, BattleInfos};
         }
         player.TakeDamage(monster.GetPower());
         if (player.GetCurrentHp() <= 0)
         {
-            BattleInfo b(monster.GetPower(),player.GetPower(), "Attack");
-            BattleInfos.push_back(b);
+            BattleInfo PlayerLose("Attack", player.GetPower(), monster.GetPower(), player.GetCurrentHp(),monster.GetCurrentHp());
+            BattleInfos.push_back(PlayerLose);
             break;
         }
-        BattleInfo c(monster.GetPower(), player.GetPower(),"Attack");
-        BattleInfos.push_back(c);
+        BattleInfo InBattle("Attack", player.GetPower(), monster.GetPower(), player.GetCurrentHp(), monster.GetCurrentHp());
+        BattleInfos.push_back(InBattle);
     }
     return { BattleResult::Lose, BattleInfos};
 }
 
-void BattleManager::ClearBattleInfos()
-{
-    BattleInfos.clear();
-}
