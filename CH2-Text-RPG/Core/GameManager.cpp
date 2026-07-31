@@ -22,6 +22,11 @@ void GameManager::Run()
     GameLoop();
 }
 
+std::vector<const Recipe*> GameManager::GetAvailableRecipes() const
+{
+    return Recipe.GetAllRecipes();
+}
+
 void GameManager::InitializePlayer()
 {
     UI.SetupPlayerInfo(PlayerCharacter);

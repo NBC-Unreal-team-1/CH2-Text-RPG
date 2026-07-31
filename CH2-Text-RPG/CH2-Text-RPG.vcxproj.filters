@@ -75,6 +75,9 @@
     <ClInclude Include="UI\ScreenData.h">
       <Filter>UI</Filter>
     </ClInclude>
+    <ClInclude Include="Skill.h">
+      <Filter>Character</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Character\Character.cpp">
@@ -124,6 +127,9 @@
     </ClCompile>
     <ClCompile Include="UI\ScreenData.cpp">
       <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Skill.cpp">
+      <Filter>Character</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

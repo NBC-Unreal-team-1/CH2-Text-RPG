@@ -2,6 +2,23 @@
 
 Player::Player()
 {
+    Skills.emplace_back(
+        1,
+        "Ä®",
+        50,
+        10,
+        SkillTriggerType::EveryNthTurn,
+        2
+    );
+
+    Skills.emplace_back(
+        2,
+        "ÇÁ¶óÀÌÆÒ",
+        70,
+        15,
+        SkillTriggerType::PlayerHpBelow,
+        50
+    );
 }
 
 Player::~Player()
@@ -48,4 +65,16 @@ const Inventory& Player::GetInventory() const
 {
     // TODO: Return the player inventory.
     return PlayerInventory;
+}
+
+const Skill* Player::GetSkillById(int Id) const
+{
+    for (const Skill& CurrentSkill : Skills)
+    {
+        if (CurrentSkill.GetId() == Id)
+        {
+            return &CurrentSkill;
+        }
+    }
+    return nullptr;
 }

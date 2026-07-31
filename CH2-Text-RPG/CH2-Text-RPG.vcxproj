@@ -145,6 +145,7 @@
     <ClInclude Include="Recipe\Recipe.h" />
     <ClInclude Include="Recipe\RecipeManager.h" />
     <ClInclude Include="Shop\ShopManager.h" />
+    <ClInclude Include="Skill.h" />
     <ClInclude Include="UI\ConsoleUtils.h" />
     <ClInclude Include="UI\ScreenData.h" />
     <ClInclude Include="UI\UIManager.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Recipe\RecipeManager.cpp" />
     <ClCompile Include="Shop\ShopManager.cpp" />
+    <ClCompile Include="Skill.cpp" />
     <ClCompile Include="UI\ConsoleUtils.cpp" />
     <ClCompile Include="UI\ScreenData.cpp" />
     <ClCompile Include="UI\UIManager.cpp" />
