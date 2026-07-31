@@ -16,6 +16,13 @@ void BattleManager::ClearBattleInfos()
     BattleInfos.clear();
 }
 
+
+
+
+
+
+
+
 std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     Player& player,
     Monster& monster,Skill* selectedSkill
@@ -24,6 +31,7 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     ClearBattleInfos();
     int PlayerTakeDamage = std::max(monster.GetPower() - player.GetDefence(), 1);
     int Turn = 0;
+    bool TrrigerSetisfied = false;
     while (player.GetCurrentHp() > 0 and monster.GetCurrentHp() > 0)
     {
         int PlayerAttackDamage = std::max(player.GetPower() - monster.GetDefence(), 1);
@@ -36,18 +44,27 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
 
         if (selectedSkill != nullptr)
         {
-            if (selectedSkill->GetId() == 1 and selectedSkill->GetManaCost() <= player.GetCurrentMp() and Turn % selectedSkill->GetTriggerValue() == 0)
+            switch (selectedSkill->GetTriggerType())
             {
-                PlayerAttackDamage = std::max(selectedSkill->GetDamage() - monster.GetDefence(), 1);
-                player.SetCurrentMp(player.GetCurrentMp() - selectedSkill->GetManaCost());
-                SkillName = selectedSkill->GetName();
+            case SkillTriggerType::EveryNthTurn:
+                TrrigerSetisfied = selectedSkill->GetTriggerValue() > 0 && Turn % selectedSkill->GetTriggerValue() == 0;
+                break;
+            case SkillTriggerType::PlayerHpBelow:
+                if (player.GetMaxHp() <= 0)
+                {
+                    break;
+                }
+                int HpPercent = player.GetCurrentHp() * 100 / player.GetMaxHp();
+                TrrigerSetisfied = HpPercent <= selectedSkill->GetTriggerValue();
+                break;
             }
-            else if (selectedSkill->GetId() == 2 and selectedSkill->GetManaCost() <= player.GetCurrentMp() and player.GetCurrentHp() <= selectedSkill->GetTriggerValue())
-            {
-                PlayerAttackDamage = std::max(selectedSkill->GetDamage() - monster.GetDefence(), 1);
-                player.SetCurrentMp(player.GetCurrentMp() - selectedSkill->GetManaCost());
-                SkillName = selectedSkill->GetName();
-            }
+        }
+        if (TrrigerSetisfied && selectedSkill->GetManaCost() <= player.GetCurrentMp())
+        {
+            PlayerAttackDamage = std::max(selectedSkill->GetDamage() - monster.GetDefence(), 1);
+            player.SetCurrentMp(player.GetCurrentMp() - selectedSkill->GetManaCost());
+            SkillName = selectedSkill->GetName();
+            TrrigerSetisfied = false;
         }
         monster.TakeDamage(PlayerAttackDamage);
         if (monster.GetCurrentHp() <= 0)
