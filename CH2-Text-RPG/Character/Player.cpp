@@ -55,6 +55,19 @@ void Player::AddGold(int Gold)
     this->Gold += Gold;
 }
 
+void Player::ApplyFoodBonus(int HpBonus, int AttackBonus, int DefenceBonus)
+{
+    if (HpBonus < 0 || AttackBonus < 0 || DefenceBonus < 0)
+    {
+        return;
+    }
+
+    SetMaxHp(GetMaxHp() + HpBonus);
+    SetCurrentHp(GetCurrentHp() + HpBonus);
+    SetPower(GetPower() + AttackBonus);
+    SetDefence(GetDefence() + DefenceBonus);
+}
+
 Inventory& Player::GetInventory()
 {
     // TODO: Return the player inventory.

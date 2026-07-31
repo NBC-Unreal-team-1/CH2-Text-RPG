@@ -17,6 +17,11 @@ public:
     int GetGold() const;
     void SetGold(int Gold);
     void AddGold(int Gold);
+    void ApplyFoodBonus(
+        int HpBonus,
+        int AttackBonus,
+        int DefenceBonus
+    );
     Inventory& GetInventory();
     const Inventory& GetInventory() const;
     const Skill* GetSkillById(int Id) const;
