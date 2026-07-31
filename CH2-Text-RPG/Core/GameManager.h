@@ -23,6 +23,7 @@ protected:
 
     Monster CreateRandomTutorialMonster();
     void ApplyBattleReward(const Monster& monster);
+    void PrintBattleReward(const Monster& monster) const;
 
 private:
     Player PlayerCharacter;
