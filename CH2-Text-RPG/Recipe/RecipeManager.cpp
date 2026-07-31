@@ -314,7 +314,54 @@ std::vector<const Recipe*> RecipeManager::SearchRecipes(
 
     return SearchResults;
 }
+bool RecipeManager::CanCompleteRecipe(
+    int RecipeID,
+    const std::vector<RecipeIngredient>& OwnedIngredients
+) const
+{
+    const Recipe* TargetRecipe = FindRecipeByID(RecipeID);
 
+    // 레시피가 존재하지 않음
+    if (TargetRecipe == nullptr)
+    {
+        return false;
+    }
+
+    // 잠긴 레시피
+    if (!TargetRecipe->IsUnlocked)
+    {
+        return false;
+    }
+
+    // 이미 제작한 레시피
+    if (TargetRecipe->IsCooked)
+    {
+        return false;
+    }
+
+    // 필요한 재료 확인
+    for (const RecipeIngredient& RequiredIngredient
+        : TargetRecipe->Ingredients)
+    {
+        int OwnedCount = 0;
+
+        for (const RecipeIngredient& OwnedIngredient
+            : OwnedIngredients)
+        {
+            if (OwnedIngredient.ItemId == RequiredIngredient.ItemId)
+            {
+                OwnedCount += OwnedIngredient.Count;
+            }
+        }
+
+        if (OwnedCount < RequiredIngredient.Count)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
 bool RecipeManager::CompleteRecipe(int RecipeID)
 {
     for (Recipe& CurrentRecipe : Recipes)
