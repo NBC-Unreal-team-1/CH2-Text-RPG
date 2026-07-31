@@ -249,11 +249,13 @@ void SetBattleLog(const BattleInfo& currentLog, ScreenData& data, std::string bo
 	resultText = "남은 체력\n플레이어: " + std::to_string(currentLog.PlayerRemainingHP)
 		+ " / 몬스터: " + std::to_string(currentLog.MonsterRemainingHP);
 
+	data.AddLine(emptyLine, LineType::out);
+	data.AddLine(">", LineType::out);
 	data.AddLine(playerTurn, LineType::out);
 	data.AddLine(monsterTurn, LineType::out);
 	data.AddLine(emptyLine, LineType::out);
 	data.AddLine(resultText, LineType::out);
-	data.AddLine(emptyLine, LineType::out);
+	data.AddLine(emptyLine, LineType::wait);
 }
 
 int UIManager::PrintBattleLog(
@@ -267,7 +269,7 @@ int UIManager::PrintBattleLog(
 
 	screen.AddLine(border, LineType::out);
 	screen.AddLine("싸운다. 그리고, 이긴다.", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine(emptyLine, LineType::ceiling);
 
 	for (std::size_t Index = 0; Index < BattleLogs.size(); ++Index)
 	{
@@ -286,6 +288,10 @@ int UIManager::PrintBattleLog(
 	for (int i = 0; i < screen.GetDataSize(); ++i)
 	{
 		screen.PrintLine(i);
+		if (screen.CheckIsWait(i))
+		{
+			WaitOutputDelay();
+		}
 	}
 
 	if (!screen.GetHasInput())
