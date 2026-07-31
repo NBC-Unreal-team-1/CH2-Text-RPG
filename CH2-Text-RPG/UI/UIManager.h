@@ -4,6 +4,8 @@
 #include <utility>
 #include <vector>
 #include <iostream>
+#include <algorithm>
+#include <cctype>
 #include <Windows.h>
 #include "../UI/ConsoleUtils.h"
 #include "../Battle/BattleInfo.h"

@@ -22,18 +22,33 @@ void WaitOutputDelay(int time = 300, int count = 3)
 	std::cout << std::endl;
 }
 
-int GetInt()
+int GetInt(ScreenData& screen)
 {
-	int in;
-	while (true)
+	std::string in;
+	std::getline(std::cin, in);
+
+	try
 	{
-		std::cin >> in;
-		if (!std::cin.fail())
+		if (stoi(in) < 0)
 		{
-			return in;
+			return -1;
 		}
-		std::cin.clear();
-		std::cin.ignore(256, '\n');
+		if (!std::all_of(in.begin(), in.end(), ::isdigit))
+		{
+			return -1;
+		}
+		
+		return stoi(in);
+	}
+	catch (const std::invalid_argument&)
+	{
+		screen.MoveToInputPos();
+		std::cout << "숫자만 입력하세요.";
+		Sleep(1000);
+		screen.MoveToInputPos();
+		screen.ClearInput();
+		FlushInput();
+		return -1;
 	}
 }
 
@@ -43,7 +58,11 @@ int UIManager::GetInput(ScreenData& screen, int min, int max) const
 	while (true)
 	{
 		screen.MoveToInputPos();
-		result = GetInt();
+		std::cout << min << "부터 " << max << " 사이의 값을 입력하세요.";
+		Sleep(1000);
+		screen.ClearInput();
+		screen.MoveToInputPos();
+		result = GetInt(screen);
 		if (result <= max && result >= min)
 		{
 			break;
@@ -75,7 +94,7 @@ int UIManager::PrintMenu()
 	ScreenData menu;
 	menu.AddLine(border, LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
-	menu.AddLine("1. 여행을 떠나요 즐거운 마음으로 황금빛 태양 축제를 여는~", LineType::out);
+	menu.AddLine("1: 여행을 떠나요 즐거운 마음으로 황금빛 태양 축제를 여는~", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
 	int menuMin = 1;
