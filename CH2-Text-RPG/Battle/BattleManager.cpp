@@ -1,5 +1,5 @@
 #include "BattleManager.h"
-
+#include <algorithm>
 #include "../Character/Monster.h"
 #include "../Character/Player.h"
 
@@ -21,8 +21,10 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     Monster& monster
 )
 {
-    int Turn = 0;
     ClearBattleInfos();
+    int PlayerAttackDamage = std::max(player.GetPower() - monster.GetDefence(), 1);
+    int PlayerTakeDamage = std::max(monster.GetPower() - player.GetDefence(), 1);
+    int Turn = 0;
     while (player.GetCurrentHp() > 0 and monster.GetCurrentHp() > 0)
     {
         Turn += 1;
@@ -30,23 +32,22 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
         {
             return { BattleResult::Lose, BattleInfos };
         }
-
-        monster.TakeDamage(player.GetPower());
+        monster.TakeDamage(PlayerAttackDamage);
         if (monster.GetCurrentHp() <= 0)
         {
-            BattleInfo PlayerWin(Turn,"Attack", player.GetPower(), 0, player.GetCurrentHp(), monster.GetCurrentHp());
+            BattleInfo PlayerWin(Turn,"Attack", PlayerAttackDamage, 0, player.GetCurrentHp(), monster.GetCurrentHp());
             BattleInfos.push_back(PlayerWin);
             return { BattleResult::Win, BattleInfos};
         }
 
-        player.TakeDamage(monster.GetPower());
+        player.TakeDamage(PlayerTakeDamage);
         if (player.GetCurrentHp() <= 0)
         {
-            BattleInfo PlayerLose(Turn, "Attack", player.GetPower(), monster.GetPower(), player.GetCurrentHp(),monster.GetCurrentHp());
+            BattleInfo PlayerLose(Turn, "Attack", PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(),monster.GetCurrentHp());
             BattleInfos.push_back(PlayerLose);
             break;
         }
-        BattleInfo InBattle(Turn, "Attack", player.GetPower(), monster.GetPower(), player.GetCurrentHp(), monster.GetCurrentHp());
+        BattleInfo InBattle(Turn, "Attack", PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(), monster.GetCurrentHp());
         BattleInfos.push_back(InBattle);
     }
     return { BattleResult::Lose, BattleInfos};
