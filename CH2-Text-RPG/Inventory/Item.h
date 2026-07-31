@@ -23,7 +23,7 @@ public:
     int GetId() const;
     const std::string& GetName() const;
 
-    //아이템 사용 순수가상함수(재료 사용, 포션 사용)
+    //포션 사용 순수가상함수
     virtual void Use(Player& player) = 0;
 
     //자식 클래스의 아이템 타입(포션, 재료) 알려줌
