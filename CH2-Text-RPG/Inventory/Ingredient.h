@@ -14,6 +14,9 @@ public:
     //재료 사용
     void Use(Player& player) override;
 
+    //"내가 재료다"라고 알려줌
+    ItemType GetItemType() const override { return ItemType::Ingredient; }
+
 protected:
 private:
 };
