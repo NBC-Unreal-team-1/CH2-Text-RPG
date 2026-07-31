@@ -151,7 +151,7 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 	return GetInput(menu, menuMin, menuMax);
 }
 
-int UIManager::PrintRecipes(const RecipeManager& recipes) const
+int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inventory) const
 {
 	int result;
 	int menuMin = 0;
@@ -182,7 +182,58 @@ int UIManager::PrintRecipes(const RecipeManager& recipes) const
 		return -1;
 	}
 
-	return GetInput(menu, menuMin, menuMax);
+	int choice = GetInput(menu, menuMin, menuMax);
+	if (choice != 0)
+	{
+		PrintSelectedRecipe(recipes.GetAllRecipes()[choice - 1], inventory);
+	}
+
+	return choice;
+}
+
+int UIManager::PrintSelectedRecipe(const Recipe* recipe, const Inventory& inventory) const
+{
+	ScreenData screen;
+	int menuMin = 0;
+	int menuMax = 0;
+	std::string temp;
+	int curQty;
+	int reqQty;
+
+	screen.AddLine(border, LineType::out);
+	temp = "[" + recipe->Name + "의 레시피]";
+	screen.AddLine(temp, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("---(필요한 것들)---", LineType::out);
+	for (int i = 0; i < recipe->Ingredients.size(); ++i)
+	{
+		int curIngredientId = recipe->Ingredients[i].ItemId;
+		temp = Item::GetNameById(curIngredientId);
+		curQty = inventory.GetItemCount(curIngredientId);
+		reqQty = recipe->Ingredients[i].Count;
+		temp = std::to_string(i + 1) + ": " + temp
+			+ "(" + std::to_string(curQty) + " / " + std::to_string(reqQty) + ")";
+		screen.AddLine(temp, LineType::out);
+	}
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("---(효과)---", LineType::out);
+	temp = "체력 증가: " + std::to_string(recipe->HpBonus)
+		+ "\n공격력 증가: " + std::to_string(recipe->AttackBonus)
+		+ "\n방어력 증가: " + std::to_string(recipe->DefenseBonus);
+	screen.AddLine(temp, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("0 : exit", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
+
+	ClearConsole();
+	for (int i = 0; i < screen.GetDataSize(); ++i)
+	{
+		screen.PrintLine(i);
+	}
+
+	GetInput(screen, menuMin, menuMax);
+	return -1;
 }
 
 void SetBattleLog(const BattleInfo& currentLog, ScreenData& data, std::string border, std::string emptyLine)
@@ -230,8 +281,6 @@ int UIManager::PrintBattleLog(
 	screen.AddLine(resultText, LineType::out);
 	screen.AddLine(emptyLine, LineType::out);
 	screen.AddLine("Enter : ", LineType::in);
-
-	
 
 	ClearConsole();
 	for (int i = 0; i < screen.GetDataSize(); ++i)

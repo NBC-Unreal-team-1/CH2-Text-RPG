@@ -85,7 +85,7 @@ void GameManager::RunTutorial()
 
     UI.PrintInventory(PlayerCharacter.GetInventory());
 
-    UI.PrintRecipes(Recipe);
+    UI.PrintRecipes(Recipe, PlayerCharacter.GetInventory());
 }
 
 Monster GameManager::CreateRandomTutorialMonster()
