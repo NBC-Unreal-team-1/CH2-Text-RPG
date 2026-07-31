@@ -31,7 +31,7 @@ namespace
 }
 
 Item::Item(int Id)
-    : Id(Id), Name("") 
+    : Id(Id), Name(GetNameById(Id))
 {
     const auto& table = GetItemNameTable();
 
@@ -71,3 +71,20 @@ const std::string& Item::GetName() const
     return this->Name;
 }
 
+//인벤토리에 객체가 없어도 Id로 이름 찾기
+const std::string& Item::GetNameById(int ItemId)
+{
+    static const std::string empty = "";
+
+    const auto& table = GetItemNameTable();
+
+    //Id로 테이블에서 이름 찾음
+    auto it = std::find_if(table.begin(), table.end(),
+        [ItemId](const std::pair<int, std::string>& entry)
+        {
+            return entry.first == ItemId;
+        });
+
+    //Id가 존재하면 이름 반환, 존재하지 않으면 빈 문자열 반환
+    return (it != table.end()) ? it->second : empty;
+}
