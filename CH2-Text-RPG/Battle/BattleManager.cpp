@@ -18,36 +18,53 @@ void BattleManager::ClearBattleInfos()
 
 std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     Player& player,
-    Monster& monster
+    Monster& monster,Skill* selectedSkill
 )
 {
     ClearBattleInfos();
-    int PlayerAttackDamage = std::max(player.GetPower() - monster.GetDefence(), 1);
     int PlayerTakeDamage = std::max(monster.GetPower() - player.GetDefence(), 1);
     int Turn = 0;
     while (player.GetCurrentHp() > 0 and monster.GetCurrentHp() > 0)
     {
+        int PlayerAttackDamage = std::max(player.GetPower() - monster.GetDefence(), 1);
+        std::string SkillName = "Attack";
         Turn += 1;
         if (player.GetPower() <= 0 or monster.GetPower() <= 0)
         {
             return { BattleResult::Lose, BattleInfos };
         }
+
+        if (selectedSkill != nullptr)
+        {
+            if (selectedSkill->GetId() == 1 and selectedSkill->GetManaCost() <= player.GetCurrentMp() and Turn % selectedSkill->GetTriggerValue() == 0)
+            {
+                PlayerAttackDamage = std::max(selectedSkill->GetDamage() - monster.GetDefence(), 1);
+                player.SetCurrentMp(player.GetCurrentMp() - selectedSkill->GetManaCost());
+                SkillName = selectedSkill->GetName();
+            }
+            else if (selectedSkill->GetId() == 2 and selectedSkill->GetManaCost() <= player.GetCurrentMp() and player.GetCurrentHp() <= selectedSkill->GetTriggerValue())
+            {
+                PlayerAttackDamage = std::max(selectedSkill->GetDamage() - monster.GetDefence(), 1);
+                player.SetCurrentMp(player.GetCurrentMp() - selectedSkill->GetManaCost());
+                SkillName = selectedSkill->GetName();
+            }
+        }
         monster.TakeDamage(PlayerAttackDamage);
         if (monster.GetCurrentHp() <= 0)
         {
-            BattleInfo PlayerWin(Turn,"Attack", PlayerAttackDamage, 0, player.GetCurrentHp(), monster.GetCurrentHp());
+            BattleInfo PlayerWin(Turn,SkillName, PlayerAttackDamage, 0, player.GetCurrentHp(), monster.GetCurrentHp());
             BattleInfos.push_back(PlayerWin);
             return { BattleResult::Win, BattleInfos};
         }
-
         player.TakeDamage(PlayerTakeDamage);
+   
         if (player.GetCurrentHp() <= 0)
         {
-            BattleInfo PlayerLose(Turn, "Attack", PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(),monster.GetCurrentHp());
+            BattleInfo PlayerLose(Turn, SkillName, PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(),monster.GetCurrentHp());
             BattleInfos.push_back(PlayerLose);
             break;
         }
-        BattleInfo InBattle(Turn, "Attack", PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(), monster.GetCurrentHp());
+        BattleInfo InBattle(Turn, SkillName, PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(), monster.GetCurrentHp());
         BattleInfos.push_back(InBattle);
     }
     return { BattleResult::Lose, BattleInfos};
