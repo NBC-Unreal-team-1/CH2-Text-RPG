@@ -93,7 +93,7 @@ int UIManager::PrintMenu() const
 {
 	int result;
 	int menuMin = 1;
-	int menuMax = 2;
+	int menuMax = 3;
 	ScreenData menu;
 	menu.AddLine(border, LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
@@ -135,7 +135,7 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 	menu.AddLine("0 : exit", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
-	menuMax = inventory.GetItems().size() + 1;
+	menuMax = inventory.GetItems().size();
 
 	ClearConsole();
 	for (int i = 0; i < menu.GetDataSize(); ++i)
@@ -169,7 +169,7 @@ int UIManager::PrintRecipes(const RecipeManager& recipes) const
 	menu.AddLine("0 : exit", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
-	menuMax = recipes.GetAllRecipes().size() + 1;
+	menuMax = recipes.GetAllRecipes().size();
 
 	ClearConsole();
 	for (int i = 0; i < menu.GetDataSize(); ++i)
