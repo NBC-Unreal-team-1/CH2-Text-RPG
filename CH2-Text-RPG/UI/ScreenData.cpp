@@ -14,7 +14,7 @@ void Line::SaveEndX()
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	endX = csbi.dwSize.X;
+	endX = csbi.dwCursorPosition.X;
 }
 
 int Line::GetEndX() const
@@ -56,5 +56,13 @@ bool ScreenData::GetHasInput() const
 
 void ScreenData::MoveToInputPos() const
 {
-	MoveCursor(data[inputLine].GetEndX(), data.size() - 1);
+	MoveCursor(data[inputLine].GetEndX(), inputLine);
+}
+
+void ScreenData::ClearInput() const
+{
+	MoveToInputPos();
+	std::cout << ClearToEndOfLine(data[inputLine].GetEndX());
+	FlushInput();
+	MoveToInputPos();
 }

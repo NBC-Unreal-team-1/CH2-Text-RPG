@@ -36,6 +36,7 @@ public:
 	void PrintLine(int i);
 	bool GetHasInput() const;
 	void MoveToInputPos() const;
+	void ClearInput() const;
 
 protected:
 
