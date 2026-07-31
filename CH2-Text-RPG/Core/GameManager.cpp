@@ -82,6 +82,10 @@ void GameManager::RunTutorial()
     }
 
     std::cout << "=== Tutorial Complete ===\n";
+
+    UI.PrintInventory(PlayerCharacter.GetInventory());
+
+    UI.PrintRecipes(Recipe);
 }
 
 Monster GameManager::CreateRandomTutorialMonster()
