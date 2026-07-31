@@ -23,6 +23,9 @@ public:
     int GetId() const;
     const std::string& GetName() const;
 
+    //Inventory에 객체 없이 Id만으로 이름 Get
+    static const std::string& GetNameById(int ItemId);
+
     //포션 사용 순수가상함수
     virtual void Use(Player& player) = 0;
 
