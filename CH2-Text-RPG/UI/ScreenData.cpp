@@ -51,6 +51,7 @@ void ScreenData::PrintLine(int i)
 	if (data[i].GetType() == LineType::in)
 	{
 		inputLine = i;
+		return;
 	}
 	std::cout << std::endl;
 }
