@@ -11,6 +11,8 @@ enum class LineType
 {
 	out,
 	in,
+	wait,
+	ceiling,
 };
 
 class Line
@@ -25,7 +27,7 @@ protected:
 private:
 	std::string text;
 	LineType type;
-	int endX;
+	int endX = 0;
 };
 
 class ScreenData

@@ -25,11 +25,12 @@ public:
     void SetupPlayerInfo(Player& player);
     int PrintMenu() const;
     int PrintInventory(const Inventory& inventory) const;
-    int PrintRecipes(const RecipeManager& recipes) const;
-    void PrintBattleLog(
+    int PrintRecipes(const RecipeManager& recipes, const Inventory& inventory) const;
+    int PrintSelectedRecipe(const Recipe* recipe, const Inventory& inventory) const;
+    int PrintBattleLog(
         const std::pair<BattleResult, std::vector<BattleInfo>>& Result
     ) const;
-
+    
 protected:
 private:
     std::string border = "========================================";

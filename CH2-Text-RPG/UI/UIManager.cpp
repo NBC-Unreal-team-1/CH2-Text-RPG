@@ -151,7 +151,7 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 	return GetInput(menu, menuMin, menuMax);
 }
 
-int UIManager::PrintRecipes(const RecipeManager& recipes) const
+int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inventory) const
 {
 	int result;
 	int menuMin = 0;
@@ -182,33 +182,116 @@ int UIManager::PrintRecipes(const RecipeManager& recipes) const
 		return -1;
 	}
 
-	return GetInput(menu, menuMin, menuMax);
+	int choice = GetInput(menu, menuMin, menuMax);
+	if (choice != 0)
+	{
+		PrintSelectedRecipe(recipes.GetAllRecipes()[choice - 1], inventory);
+	}
+
+	return choice;
 }
 
-void UIManager::PrintBattleLog(
+int UIManager::PrintSelectedRecipe(const Recipe* recipe, const Inventory& inventory) const
+{
+	ScreenData screen;
+	int menuMin = 0;
+	int menuMax = 0;
+	std::string temp;
+	int curQty;
+	int reqQty;
+
+	screen.AddLine(border, LineType::out);
+	temp = "[" + recipe->Name + "의 레시피]";
+	screen.AddLine(temp, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("---(필요한 것들)---", LineType::out);
+	for (int i = 0; i < recipe->Ingredients.size(); ++i)
+	{
+		int curIngredientId = recipe->Ingredients[i].ItemId;
+		temp = Item::GetNameById(curIngredientId);
+		curQty = inventory.GetItemCount(curIngredientId);
+		reqQty = recipe->Ingredients[i].Count;
+		temp = std::to_string(i + 1) + ": " + temp
+			+ "(" + std::to_string(curQty) + " / " + std::to_string(reqQty) + ")";
+		screen.AddLine(temp, LineType::out);
+	}
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("---(효과)---", LineType::out);
+	temp = "체력 증가: " + std::to_string(recipe->HpBonus)
+		+ "\n공격력 증가: " + std::to_string(recipe->AttackBonus)
+		+ "\n방어력 증가: " + std::to_string(recipe->DefenseBonus);
+	screen.AddLine(temp, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("0 : exit", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
+
+	ClearConsole();
+	for (int i = 0; i < screen.GetDataSize(); ++i)
+	{
+		screen.PrintLine(i);
+	}
+
+	GetInput(screen, menuMin, menuMax);
+	return -1;
+}
+
+void SetBattleLog(const BattleInfo& currentLog, ScreenData& data, std::string border, std::string emptyLine)
+{
+	std::string playerTurn;
+	std::string monsterTurn;
+	std::string resultText;
+
+	playerTurn = "플레이어의 공격!\n몬스터에게 "
+		+ std::to_string(currentLog.PlayerAttackDamage) + "의 데미지!";
+	monsterTurn = "몬스터의 공격!\n플레이어에게 "
+		+ std::to_string(currentLog.MonsterAttackDamage) + "의 데미지!";
+	resultText = "남은 체력\n플레이어: " + std::to_string(currentLog.PlayerRemainingHP)
+		+ " / 몬스터: " + std::to_string(currentLog.MonsterRemainingHP);
+
+	data.AddLine(playerTurn, LineType::out);
+	data.AddLine(monsterTurn, LineType::out);
+	data.AddLine(emptyLine, LineType::out);
+	data.AddLine(resultText, LineType::out);
+	data.AddLine(emptyLine, LineType::out);
+}
+
+int UIManager::PrintBattleLog(
 	const std::pair<BattleResult, std::vector<BattleInfo>>& Result
 ) const
 {
 	const std::vector<BattleInfo>& BattleLogs = Result.second;
+	ScreenData screen;
+	int menuMin = 0;
+	int menuMax = 0;
+
+	screen.AddLine(border, LineType::out);
+	screen.AddLine("싸운다. 그리고, 이긴다.", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
 
 	for (std::size_t Index = 0; Index < BattleLogs.size(); ++Index)
 	{
-		const BattleInfo& CurrentLog = BattleLogs[Index];
-
-		std::cout << "Turn " << Index + 1 << '\n';
-		std::cout << "  Player Damage: "
-			<< CurrentLog.PlayerAttackDamage << '\n';
-		std::cout << "  Monster Damage: "
-			<< CurrentLog.MonsterAttackDamage << '\n';
-		std::cout << "  Player HP: "
-			<< CurrentLog.PlayerRemainingHP << '\n';
-		std::cout << "  Monster HP: "
-			<< CurrentLog.MonsterRemainingHP << '\n';
-		WaitOutputDelay();
+		SetBattleLog(BattleLogs[Index], screen, border, emptyLine);
 	}
 
-	std::cout << '\n';
-	std::cout << "Battle Result: "
-		<< (Result.first == BattleResult::Win ? "Win" : "Lose")
-		<< '\n';
+	screen.AddLine(border, LineType::out);
+	std::string resultText =
+		(Result.first == BattleResult::Win) ?
+		"싸웠더니 배가 고프다. 맛있는 거 먹으러 가자." : "나는 아직 네녀석을 요리할 자격이 없나보군...";
+	screen.AddLine(resultText, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
+
+	ClearConsole();
+	for (int i = 0; i < screen.GetDataSize(); ++i)
+	{
+		screen.PrintLine(i);
+	}
+
+	if (!screen.GetHasInput())
+	{
+		return -1;
+	}
+
+	return GetInput(screen, menuMin, menuMax);
 }
