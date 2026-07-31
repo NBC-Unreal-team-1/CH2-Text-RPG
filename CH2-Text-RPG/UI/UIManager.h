@@ -11,6 +11,7 @@
 #include "../Battle/BattleInfo.h"
 #include "../Battle/BattleResult.h"
 #include "../Character/Player.h"
+#include "../Inventory/Item.h"
 #include "../UI/ScreenData.h"
 
 class UIManager
@@ -21,7 +22,8 @@ public:
 
     int GetInput(ScreenData& screen, int min, int max) const;
     void SetupPlayerInfo(Player& player);
-    int PrintMenu();
+    int PrintMenu() const;
+    int PrintInventory(const Inventory& inventory) const;
     void PrintBattleLog(
         const std::pair<BattleResult, std::vector<BattleInfo>>& Result
     ) const;

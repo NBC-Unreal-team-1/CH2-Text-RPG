@@ -34,6 +34,8 @@ void GameManager::RunTutorial()
 {
     UI.PrintMenu();
 
+    
+
     std::uniform_int_distribution<int> BattleCountDistribution(3, 4);
     const int BattleCount = BattleCountDistribution(RandomEngine);
 
@@ -78,6 +80,8 @@ void GameManager::RunTutorial()
     }
 
     std::cout << "=== Tutorial Complete ===\n";
+
+    UI.PrintInventory(PlayerCharacter.GetInventory());
 }
 
 Monster GameManager::CreateRandomTutorialMonster()

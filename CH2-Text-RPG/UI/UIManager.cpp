@@ -37,7 +37,7 @@ int GetInt(ScreenData& screen)
 		{
 			return -1;
 		}
-		
+
 		return stoi(in);
 	}
 	catch (const std::invalid_argument&)
@@ -68,6 +68,7 @@ int UIManager::GetInput(ScreenData& screen, int min, int max) const
 			break;
 		}
 	}
+	ClearConsole();
 	return result;
 }
 
@@ -88,22 +89,58 @@ void UIManager::SetupPlayerInfo(Player& player)
 	player.SetPower(power);
 }
 
-int UIManager::PrintMenu()
+int UIManager::PrintMenu() const
 {
 	int result;
+	int menuMin = 1;
+	int menuMax = 1;
 	ScreenData menu;
 	menu.AddLine(border, LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("1: 여행을 떠나요 즐거운 마음으로 황금빛 태양 축제를 여는~", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
-	int menuMin = 1;
-	int menuMax = 1;
+
 
 	for (int i = 0; i < menu.GetDataSize(); ++i)
 	{
 		menu.PrintLine(i);
 	}
+
+	if (!menu.GetHasInput())
+	{
+		return -1;
+	}
+
+	return GetInput(menu, menuMin, menuMax);
+}
+
+int UIManager::PrintInventory(const Inventory& inventory) const
+{
+	int result;
+	int menuMin = 0;
+	int menuMax;
+	ScreenData menu;
+	menu.AddLine(border, LineType::out);
+	menu.AddLine("아이템 목록", LineType::out);
+	menu.AddLine(emptyLine, LineType::out);
+	for (int i = 0; i < inventory.GetItems().size(); ++i)
+	{
+		std::string itemName = inventory.GetItems()[i].ItemPtr->GetName();
+		itemName = std::to_string(i + 1) + ": " + itemName;
+		menu.AddLine("??", LineType::out);
+	}
+	menu.AddLine("0 : exit", LineType::out);
+	menu.AddLine(emptyLine, LineType::out);
+	menu.AddLine("Enter : ", LineType::in);
+	menuMax = menu.GetDataSize();
+
+	ClearConsole();
+	for (int i = 0; i < menu.GetDataSize(); ++i)
+	{
+		menu.PrintLine(i);
+	}
+	std::cout << inventory.GetItems().size() << "라니" << std::endl;
 
 	if (!menu.GetHasInput())
 	{
