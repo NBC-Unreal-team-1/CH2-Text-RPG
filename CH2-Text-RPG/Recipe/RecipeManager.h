@@ -32,11 +32,8 @@ public:
         const std::vector<RecipeIngredient>& OwnedIngredients
     ) const;
 
-    // 음식 제작 완료 처리
+    // 제작과 섭취를 한 번에 처리
     bool CompleteRecipe(int RecipeID);
-
-    // 음식 섭취 완료 처리
-    bool EatRecipe(int RecipeID);
 
 private:
     // 일반 음식 10개를 모두 먹었는지 확인
