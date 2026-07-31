@@ -26,6 +26,12 @@ public:
         const std::string& Keyword
     ) const;
 
+    // 현재 보유 재료로 제작 가능한지 확인
+    bool CanCompleteRecipe(
+        int RecipeID,
+        const std::vector<RecipeIngredient>& OwnedIngredients
+    ) const;
+
     // 음식 제작 완료 처리
     bool CompleteRecipe(int RecipeID);
 
