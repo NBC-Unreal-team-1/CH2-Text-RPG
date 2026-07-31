@@ -20,10 +20,13 @@ public:
     // 아이템 추가
     void AddItem(int ItemId, int Count = 1);
 
-    // 아이템 제거
-    bool RemoveItem(int ItemId, int Count = 1);
+    // 아이템 수량 감소
+    bool ReduceItem(int ItemId, int Count = 1);
 
-    // 아이템 사용
+    // 아이템 제거
+    bool RemoveItem(int ItemId);
+
+    // 포션 사용
     bool UseItem(int ItemId, Player& player);
 
     // 인벤토리 전체 Get
@@ -35,6 +38,9 @@ public:
 
     //특정 아이템의 보유 개수 반환
     int GetItemCount(int ItemId) const;
+
+    //아이템 존재 여부 반환
+    bool HasItem(int ItemId);
 
 protected:
 private:

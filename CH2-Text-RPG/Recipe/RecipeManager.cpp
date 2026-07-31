@@ -229,13 +229,13 @@ std::vector<const Recipe*> RecipeManager::GetAllRecipes() const
         AllRecipes.push_back(&CurrentRecipe);
     }
 
-    // 일반 음식 10개를 전부 먹은 뒤에만 조회 가능
+    // 잠긴 궁극의 햄버거는 목록에서 제외
     if (FinalBurger.IsUnlocked)
     {
         AllRecipes.push_back(&FinalBurger);
     }
 
-    // 궁극의 햄버거를 만든 뒤에만 조회 가능
+    // 잠긴 감자튀김은 목록에서 제외
     if (FrenchFrie.IsUnlocked)
     {
         AllRecipes.push_back(&FrenchFrie);
@@ -256,7 +256,7 @@ const Recipe* RecipeManager::FindRecipeByID(
         }
     }
 
-    // 잠긴 궁극의 햄버거는 검색되지 않음
+    // 잠긴 특수 레시피는 검색되지 않음
     if (
         FinalBurger.IsUnlocked &&
         FinalBurger.Id == RecipeID
@@ -265,7 +265,6 @@ const Recipe* RecipeManager::FindRecipeByID(
         return &FinalBurger;
     }
 
-    // 잠긴 감자튀김은 검색되지 않음
     if (
         FrenchFrie.IsUnlocked &&
         FrenchFrie.Id == RecipeID
@@ -294,7 +293,7 @@ std::vector<const Recipe*> RecipeManager::SearchRecipes(
         }
     }
 
-    // 잠긴 궁극의 햄버거는 검색되지 않음
+    // 잠긴 특수 레시피는 검색 결과에서 제외
     if (
         FinalBurger.IsUnlocked &&
         FinalBurger.Name.find(Keyword) != std::string::npos
@@ -303,7 +302,6 @@ std::vector<const Recipe*> RecipeManager::SearchRecipes(
         SearchResults.push_back(&FinalBurger);
     }
 
-    // 잠긴 감자튀김은 검색되지 않음
     if (
         FrenchFrie.IsUnlocked &&
         FrenchFrie.Name.find(Keyword) != std::string::npos
@@ -314,6 +312,7 @@ std::vector<const Recipe*> RecipeManager::SearchRecipes(
 
     return SearchResults;
 }
+
 bool RecipeManager::CanCompleteRecipe(
     int RecipeID,
     const std::vector<RecipeIngredient>& OwnedIngredients
@@ -321,117 +320,57 @@ bool RecipeManager::CanCompleteRecipe(
 {
     const Recipe* TargetRecipe = FindRecipeByID(RecipeID);
 
-    // 레시피가 존재하지 않음
+    // 존재하지 않거나 잠긴 특수 레시피
     if (TargetRecipe == nullptr)
     {
         return false;
     }
 
-    // 잠긴 레시피
+    // 잠긴 일반 레시피
     if (!TargetRecipe->IsUnlocked)
     {
         return false;
     }
 
-    // 이미 제작한 레시피
-    if (TargetRecipe->IsCooked)
+    // 이미 제작하거나 먹은 레시피
+    if (TargetRecipe->IsCooked || TargetRecipe->IsEaten)
     {
         return false;
     }
 
-    // 필요한 재료 확인
+    // 필요한 모든 재료 확인
     for (const RecipeIngredient& RequiredIngredient
         : TargetRecipe->Ingredients)
     {
         int OwnedCount = 0;
 
+        // 같은 아이템 ID의 보유 수량을 모두 더함
         for (const RecipeIngredient& OwnedIngredient
             : OwnedIngredients)
         {
-            if (OwnedIngredient.ItemId == RequiredIngredient.ItemId)
+            if (
+                OwnedIngredient.ItemId ==
+                RequiredIngredient.ItemId
+                )
             {
                 OwnedCount += OwnedIngredient.Count;
             }
         }
 
+        // 필요한 수량보다 적게 가지고 있음
         if (OwnedCount < RequiredIngredient.Count)
         {
             return false;
         }
     }
 
+    // 모든 조건을 만족함
     return true;
 }
+
 bool RecipeManager::CompleteRecipe(int RecipeID)
 {
-    for (Recipe& CurrentRecipe : Recipes)
-    {
-        if (CurrentRecipe.Id != RecipeID)
-        {
-            continue;
-        }
-
-        // 잠긴 레시피는 제작할 수 없음
-        if (!CurrentRecipe.IsUnlocked)
-        {
-            return false;
-        }
-
-        // 이미 제작한 음식은 중복 처리하지 않음
-        if (CurrentRecipe.IsCooked)
-        {
-            return false;
-        }
-
-        CurrentRecipe.IsCooked = true;
-
-        return true;
-    }
-
-    // 궁극의 햄버거 제작
-    if (FinalBurger.Id == RecipeID)
-    {
-        if (!FinalBurger.IsUnlocked)
-        {
-            return false;
-        }
-
-        if (FinalBurger.IsCooked)
-        {
-            return false;
-        }
-
-        FinalBurger.IsCooked = true;
-
-        // 궁극의 햄버거가 만들어지면 감자튀김 해금
-        FrenchFrie.IsUnlocked = true;
-
-        return true;
-    }
-
-    // 감자튀김 제작
-    if (FrenchFrie.Id == RecipeID)
-    {
-        if (!FrenchFrie.IsUnlocked)
-        {
-            return false;
-        }
-
-        if (FrenchFrie.IsCooked)
-        {
-            return false;
-        }
-
-        FrenchFrie.IsCooked = true;
-
-        return true;
-    }
-
-    return false;
-}
-
-bool RecipeManager::EatRecipe(int RecipeID)
-{
+    // 일반 레시피 처리
     for (std::size_t Index = 0; Index < Recipes.size(); ++Index)
     {
         Recipe& CurrentRecipe = Recipes[Index];
@@ -441,35 +380,31 @@ bool RecipeManager::EatRecipe(int RecipeID)
             continue;
         }
 
-        // 잠긴 레시피의 음식은 먹을 수 없음
+        // 잠긴 레시피
         if (!CurrentRecipe.IsUnlocked)
         {
             return false;
         }
 
-        // 제작하지 않은 음식은 먹을 수 없음
-        if (!CurrentRecipe.IsCooked)
+        // 이미 제작하거나 먹은 레시피
+        if (CurrentRecipe.IsCooked || CurrentRecipe.IsEaten)
         {
             return false;
         }
 
-        // 이미 먹은 음식은 중복 처리하지 않음
-        if (CurrentRecipe.IsEaten)
-        {
-            return false;
-        }
-
+        // 제작과 섭취를 한 번에 처리
+        CurrentRecipe.IsCooked = true;
         CurrentRecipe.IsEaten = true;
 
         const std::size_t NextIndex = Index + 1;
 
-        // 현재 음식을 먹으면 다음 일반 레시피 해금
+        // 다음 일반 레시피 해금
         if (NextIndex < Recipes.size())
         {
             Recipes[NextIndex].IsUnlocked = true;
         }
 
-        // 일반 음식 10개를 모두 먹으면 궁극의 햄버거 해금
+        // 일반 음식 10개를 모두 먹으면 햄버거 해금
         if (AreAllNormalRecipesEaten())
         {
             FinalBurger.IsUnlocked = true;
@@ -478,6 +413,50 @@ bool RecipeManager::EatRecipe(int RecipeID)
         return true;
     }
 
+    // 궁극의 햄버거 처리
+    if (FinalBurger.Id == RecipeID)
+    {
+        if (!FinalBurger.IsUnlocked)
+        {
+            return false;
+        }
+
+        if (FinalBurger.IsCooked || FinalBurger.IsEaten)
+        {
+            return false;
+        }
+
+        // 햄버거 제작과 섭취를 한 번에 처리
+        FinalBurger.IsCooked = true;
+        FinalBurger.IsEaten = true;
+
+        // 햄버거를 완성하면 감자튀김 해금
+        FrenchFrie.IsUnlocked = true;
+
+        return true;
+    }
+
+    // 감자튀김 처리
+    if (FrenchFrie.Id == RecipeID)
+    {
+        if (!FrenchFrie.IsUnlocked)
+        {
+            return false;
+        }
+
+        if (FrenchFrie.IsCooked || FrenchFrie.IsEaten)
+        {
+            return false;
+        }
+
+        // 감자튀김 제작과 섭취를 한 번에 처리
+        FrenchFrie.IsCooked = true;
+        FrenchFrie.IsEaten = true;
+
+        return true;
+    }
+
+    // 해당 ID의 레시피가 존재하지 않음
     return false;
 }
 
