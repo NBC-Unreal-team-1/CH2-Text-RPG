@@ -58,6 +58,97 @@ void Monster::GenerateStat()
         DropIngredientAmount = 1;
         break;
 
+    case MonsterType::Tomato:
+        SetName("토마토");
+        SetLevel(4);
+        SetMaxHp(150);
+        SetCurrentHp(150);
+        SetPower(20);
+        SetDefence(8);
+        DropGold = 20;
+
+        DropIngredientId = 103;
+        DropIngredientAmount = 1;
+        break;
+
+    case MonsterType::Ketchup:
+        SetName("케첩");
+        SetLevel(5);
+        SetMaxHp(195);
+        SetCurrentHp(195);
+        SetPower(24);
+        SetDefence(12);
+        DropGold = 25;
+
+        DropIngredientId = 104;
+        DropIngredientAmount = 1;
+        break;
+
+    case MonsterType::Mayonnaise:
+        SetName("마요네즈");
+        SetLevel(6);
+        SetMaxHp(245);
+        SetCurrentHp(245);
+        SetPower(28);
+        SetDefence(16);
+        DropGold = 30;
+
+        DropIngredientId = 105;
+        DropIngredientAmount = 1;
+        break;
+
+    case MonsterType::Bacon:
+        SetName("베이컨");
+        SetLevel(7);
+        SetMaxHp(300);
+        SetCurrentHp(300);
+        SetPower(32);
+        SetDefence(20);
+        DropGold = 35;
+
+        DropIngredientId = 106;
+        DropIngredientAmount = 1;
+        break;
+
+    case MonsterType::Cheese:
+        SetName("치즈");
+        SetLevel(8);
+        SetMaxHp(360);
+        SetCurrentHp(360);
+        SetPower(36);
+        SetDefence(24);
+        DropGold = 40;
+
+        DropIngredientId = 107;
+        DropIngredientAmount = 1;
+        break;
+
+    case MonsterType::Bread:
+        SetName("빵");
+        SetLevel(9);
+        SetMaxHp(425);
+        SetCurrentHp(425);
+        SetPower(40);
+        SetDefence(28);
+        DropGold = 45;
+
+        DropIngredientId = 108;
+        DropIngredientAmount = 1;
+        break;
+
+    case MonsterType::Patty:
+        SetName("패티");
+        SetLevel(10);
+        SetMaxHp(500);
+        SetCurrentHp(500);
+        SetPower(45);
+        SetDefence(32);
+        DropGold = 50;
+
+        DropIngredientId = 109;
+        DropIngredientAmount = 1;
+        break;
+
     default:
         break;
     }
