@@ -27,6 +27,11 @@ const std::string& Skill::GetName() const
     return Name;
 }
 
+int Skill::GetManaCost() const
+{
+    return ManaCost;
+}
+
 int Skill::GetDamage() const
 {
     return Damage;

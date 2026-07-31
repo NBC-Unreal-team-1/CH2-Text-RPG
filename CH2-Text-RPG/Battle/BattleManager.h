@@ -8,6 +8,7 @@
 
 class Player;
 class Monster;
+class Skill;
 
 class BattleManager
 {
@@ -16,7 +17,7 @@ public:
     ~BattleManager();
     std::pair<BattleResult, std::vector<BattleInfo>> StartBattle(
         Player& player,
-        Monster& monster
+        Monster& monster, Skill* selectedSkill = nullptr
     );
   
 
