@@ -25,6 +25,9 @@ public:
     PotionType GetType() const;
     int GetAmount() const;
 
+    //"내가 포션이다"라고 알려줌
+    ItemType GetItemType() const override { return ItemType::Potion; }
+
 protected:
 private:
     PotionType Type;

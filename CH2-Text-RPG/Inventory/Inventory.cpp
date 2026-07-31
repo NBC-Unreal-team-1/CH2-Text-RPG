@@ -47,9 +47,18 @@ bool Inventory::RemoveItem(int ItemId, int Count)
         return false; // 없는 아이템
     }
 
-    slot->Count -= Count;
+    //보유 개수보다 많이 제거하려하면 return false
+    if (slot->Count - Count >= 0)
+    {
+        slot->Count -= Count;
+    }
+    else
+    {
+        return false;
+    }
+   
 
-    if (slot->Count <= 0)
+    if (slot->Count == 0)
     {
         // 포인터 slot을 iterator로 변환. (인벤토리 아이템의 실제 주소 - Items의 첫 번째 원소의 실제 메모리 주소)로 Items 안에서의 로컬 주소 알아냄.
         auto it = Items.begin() + (slot - Items.data());
@@ -69,11 +78,18 @@ bool Inventory::UseItem(int ItemId, Player& player)
         return false; // 없는 아이템은 사용 불가
     }
 
+    //타입이 포션이 아니면(재료이면) return false
+    if (slot->ItemPtr->GetItemType() != ItemType::Potion)
+    {
+        return false;
+    }
+
     slot->ItemPtr->Use(player); // 효과 적용
 
     RemoveItem(ItemId, 1);      // 사용한 만큼 수량 차감
 
     return true;
+
 }
 
 //모든 아이템들 반환

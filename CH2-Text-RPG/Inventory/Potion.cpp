@@ -62,8 +62,7 @@ void Potion::Use(Player& player)
     case PotionType::Mana:
         int newMp = player.GetCurrentMp() + GetAmount();
         newMp = std::min(newMp, player.GetMaxMp()); // 최대치 초과 방지
-        player.SetCurrentHp(newMp);
-        break;
+        player.SetCurrentMp(newMp);
         break;
     }
 }
