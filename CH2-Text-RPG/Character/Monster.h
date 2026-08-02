@@ -13,7 +13,8 @@ enum class MonsterType
     Bacon,
     Cheese,
     Bread,
-    Patty
+    Patty,
+    PotatoBoss
 };
 
 class Monster : public Character

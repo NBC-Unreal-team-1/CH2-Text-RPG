@@ -460,6 +460,11 @@ bool RecipeManager::CompleteRecipe(int RecipeID)
     return false;
 }
 
+bool RecipeManager::IsFinalRecipeCompleted() const
+{
+    return FrenchFrie.IsCooked && FrenchFrie.IsEaten;
+}
+
 bool RecipeManager::AreAllNormalRecipesEaten() const
 {
     for (const Recipe& CurrentRecipe : Recipes)
