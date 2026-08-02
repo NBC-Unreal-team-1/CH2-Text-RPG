@@ -35,6 +35,8 @@ public:
     // 제작과 섭취를 한 번에 처리
     bool CompleteRecipe(int RecipeID);
 
+    bool IsFinalRecipeCompleted() const;
+
 private:
     // 일반 음식 10개를 모두 먹었는지 확인
     bool AreAllNormalRecipesEaten() const;

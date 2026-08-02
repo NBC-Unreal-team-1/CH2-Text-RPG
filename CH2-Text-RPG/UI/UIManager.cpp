@@ -91,8 +91,7 @@ void UIManager::SetupPlayerInfo(Player& player)
 
 int UIManager::PrintMenu() const
 {
-	int result;
-	int menuMin = 1;
+	int menuMin = 0;
 	int menuMax = 3;
 	ScreenData menu;
 	menu.AddLine(border, LineType::out);
@@ -100,6 +99,7 @@ int UIManager::PrintMenu() const
 	menu.AddLine("1: 여행을 떠나요 즐거운 마음으로 황금빛 태양 축제를 여는~", LineType::out);
 	menu.AddLine("2: 빈손으로 여행을 떠난 나에게 남은 것이라곤...", LineType::out);
 	menu.AddLine("3: 진정한 맛은 재료와 정성에서 시작된다.", LineType::out);
+	menu.AddLine("0: 게임을 종료합니다.", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
 
@@ -119,7 +119,6 @@ int UIManager::PrintMenu() const
 
 int UIManager::PrintInventory(const Inventory& inventory) const
 {
-	int result;
 	int menuMin = 0;
 	int menuMax;
 	ScreenData menu;
@@ -135,7 +134,7 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 	menu.AddLine("0 : exit", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
-	menuMax = inventory.GetItems().size();
+	menuMax = static_cast<int>(inventory.GetItems().size());
 
 	ClearConsole();
 	for (int i = 0; i < menu.GetDataSize(); ++i)
@@ -153,7 +152,6 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 
 int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inventory) const
 {
-	int result;
 	int menuMin = 0;
 	int menuMax;
 	ScreenData menu;
@@ -169,7 +167,7 @@ int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inven
 	menu.AddLine("0 : exit", LineType::out);
 	menu.AddLine(emptyLine, LineType::out);
 	menu.AddLine("Enter : ", LineType::in);
-	menuMax = recipes.GetAllRecipes().size();
+	menuMax = static_cast<int>(recipes.GetAllRecipes().size());
 
 	ClearConsole();
 	for (int i = 0; i < menu.GetDataSize(); ++i)

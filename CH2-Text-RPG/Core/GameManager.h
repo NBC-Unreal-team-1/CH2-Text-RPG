@@ -24,7 +24,14 @@ protected:
     void RunTutorial();
     void GameLoop();
 
+    void RunNextIngredientBattle();
+    void RunBossBattle();
+    void HandleRecipeMenu();
+    bool CookRecipe(int RecipeId);
+
     Monster CreateRandomTutorialMonster();
+    const ::Recipe* FindNextRecipe() const;
+    int FindMissingIngredientId(const ::Recipe& recipe) const;
     void ApplyBattleReward(const Monster& monster);
     void PrintBattleReward(const Monster& monster) const;
 
