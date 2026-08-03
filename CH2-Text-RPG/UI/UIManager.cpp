@@ -145,9 +145,9 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 		itemName = std::to_string(i + 1) + ": " + itemName;
 		screen.AddLine(itemName, LineType::out);
 	}
-	menu.AddLine("0 : exit", LineType::out);
-	menu.AddLine(emptyLine, LineType::out);
-	menu.AddLine("Enter : ", LineType::in);
+	screen.AddLine("0 : exit", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
 	menuMax = inventory.GetItems().size();
 
 	ClearConsole();
@@ -179,9 +179,9 @@ int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inven
 		text = std::to_string(i + 1) + ": " + text;
 		screen.AddLine(text, LineType::out);
 	}
-	menu.AddLine("0 : exit", LineType::out);
-	menu.AddLine(emptyLine, LineType::out);
-	menu.AddLine("Enter : ", LineType::in);
+	screen.AddLine("0 : exit", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
 	menuMax = recipes.GetAllRecipes().size();
 
 	ClearConsole();
