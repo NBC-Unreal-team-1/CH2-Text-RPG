@@ -78,6 +78,9 @@
     <ClInclude Include="Skill.h">
       <Filter>Character</Filter>
     </ClInclude>
+    <ClInclude Include="Shop\ShopItem.h">
+      <Filter>Shop</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Character\Character.cpp">

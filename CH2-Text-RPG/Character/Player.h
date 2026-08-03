@@ -26,6 +26,9 @@ public:
     const Inventory& GetInventory() const;
     const Skill* GetSkillById(int Id) const;
 
+	// Gold를 소비하는 함수
+    bool SpendGold(int amount);
+
 protected:
 private:
     int Exp = 0;
