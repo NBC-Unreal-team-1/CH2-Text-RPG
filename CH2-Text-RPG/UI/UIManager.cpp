@@ -116,6 +116,7 @@ int UIManager::PrintMenu() const
 	screen.AddLine("3: 진정한 맛은 재료와 정성에서 시작된다.", LineType::out);
 	screen.AddLine("0: 게임을 종료합니다.", LineType::out);
 	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine(border, LineType::out);
 	screen.AddLine("Enter : ", LineType::in);
 
 	ClearConsole();
@@ -149,6 +150,7 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 	}
 	screen.AddLine("0 : exit", LineType::out);
 	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine(border, LineType::out);
 	screen.AddLine("Enter : ", LineType::in);
 	menuMax = inventory.GetItems().size();
 
@@ -183,6 +185,7 @@ int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inven
 	}
 	screen.AddLine("0 : exit", LineType::out);
 	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine(border, LineType::out);
 	screen.AddLine("Enter : ", LineType::in);
 	menuMax = recipes.GetAllRecipes().size();
 
@@ -210,7 +213,7 @@ int UIManager::PrintSelectedRecipe(const Recipe* recipe, const Inventory& invent
 {
 	ScreenData screen;
 	int menuMin = 0;
-	int menuMax = 0;
+	int menuMax = 1;
 	std::string temp;
 	int curQty;
 	int reqQty;
