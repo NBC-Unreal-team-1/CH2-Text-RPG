@@ -11,6 +11,7 @@
 #include "../Battle/BattleInfo.h"
 #include "../Battle/BattleResult.h"
 #include "../Character/Player.h"
+#include "../Character/Monster.h"
 #include "../Inventory/Item.h"
 #include "../Recipe/RecipeManager.h"
 #include "../UI/ScreenData.h"
@@ -30,6 +31,7 @@ public:
     int PrintBattleLog(
         const std::pair<BattleResult, std::vector<BattleInfo>>& Result
     ) const;
+    int PrintBattleResult(const Player& player, const Monster& monster) const;
     
 protected:
 private:
