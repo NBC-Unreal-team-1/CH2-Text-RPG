@@ -69,7 +69,15 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
         monster.TakeDamage(PlayerAttackDamage);
         if (monster.GetCurrentHp() <= 0)
         {
-            BattleInfo PlayerWin(Turn,SkillName, PlayerAttackDamage, 0, player.GetCurrentHp(), monster.GetCurrentHp());
+            BattleInfo PlayerWin(
+                Turn,
+                SkillName,
+                monster.GetName(),
+                PlayerAttackDamage,
+                0,
+                player.GetCurrentHp(),
+                monster.GetCurrentHp()
+            );
             BattleInfos.push_back(PlayerWin);
             return { BattleResult::Win, BattleInfos};
         }
@@ -77,11 +85,27 @@ std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
    
         if (player.GetCurrentHp() <= 0)
         {
-            BattleInfo PlayerLose(Turn, SkillName, PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(),monster.GetCurrentHp());
+            BattleInfo PlayerLose(
+                Turn,
+                SkillName,
+                monster.GetName(),
+                PlayerAttackDamage,
+                PlayerTakeDamage,
+                player.GetCurrentHp(),
+                monster.GetCurrentHp()
+            );
             BattleInfos.push_back(PlayerLose);
             break;
         }
-        BattleInfo InBattle(Turn, SkillName, PlayerAttackDamage, PlayerTakeDamage, player.GetCurrentHp(), monster.GetCurrentHp());
+        BattleInfo InBattle(
+            Turn,
+            SkillName,
+            monster.GetName(),
+            PlayerAttackDamage,
+            PlayerTakeDamage,
+            player.GetCurrentHp(),
+            monster.GetCurrentHp()
+        );
         BattleInfos.push_back(InBattle);
     }
     return { BattleResult::Lose, BattleInfos};
