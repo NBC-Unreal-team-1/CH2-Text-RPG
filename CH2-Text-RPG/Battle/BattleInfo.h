@@ -8,6 +8,8 @@ struct BattleInfo
 
     std::string MonsterName;
 
+    int MonsterId = 0;
+
     int Turn = 0;
 
     int MonsterAttackDamage = 0;
@@ -22,6 +24,7 @@ struct BattleInfo
         int turn,
         std::string skillName,
         std::string monsterName,
+        int monsterId,
         int attackDamage,
         int getDamage,
         int playerHP,
@@ -33,6 +36,8 @@ struct BattleInfo
         this->SkillName = skillName;
 
         this->MonsterName = monsterName;
+
+        this->MonsterId = monsterId;
 
         this->MonsterAttackDamage = getDamage;
 

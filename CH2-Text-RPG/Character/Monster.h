@@ -26,6 +26,7 @@ public:
 
     void GenerateStat();
 
+    int GetId() const;
     MonsterType GetMonsterId() const;
     int GetDropGold() const;
 

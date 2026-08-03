@@ -166,6 +166,12 @@ void Monster::GenerateStat()
     }
 }
 
+int Monster::GetId() const
+{
+    constexpr int FirstMonsterId = 501;
+    return FirstMonsterId + static_cast<int>(MonsterId);
+}
+
 MonsterType Monster::GetMonsterId() const
 {
     return MonsterId;
