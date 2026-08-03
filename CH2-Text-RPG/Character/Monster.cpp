@@ -149,6 +149,18 @@ void Monster::GenerateStat()
         DropIngredientAmount = 1;
         break;
 
+    case MonsterType::PotatoBoss:
+        SetName("°¨ÀÚ ´ë¿Õ");
+        SetLevel(11);
+        SetMaxHp(700);
+        SetCurrentHp(700);
+        SetPower(55);
+        SetDefence(35);
+        DropGold = 100;
+        DropIngredientId = 110;
+        DropIngredientAmount = 1;
+        break;
+
     default:
         break;
     }
