@@ -6,6 +6,10 @@ struct BattleInfo
 
     std::string SkillName;
 
+    std::string MonsterName;
+
+    int MonsterId = 0;
+
     int Turn = 0;
 
     int MonsterAttackDamage = 0;
@@ -16,11 +20,24 @@ struct BattleInfo
 
     int MonsterRemainingHP = 0;
 
-    BattleInfo(int turn, std::string skillName,int attackDamage, int getDamage,int playerHP,int monsterHP)
+    BattleInfo(
+        int turn,
+        std::string skillName,
+        std::string monsterName,
+        int monsterId,
+        int attackDamage,
+        int getDamage,
+        int playerHP,
+        int monsterHP
+    )
     {
         this->Turn = turn;
 
         this->SkillName = skillName;
+
+        this->MonsterName = monsterName;
+
+        this->MonsterId = monsterId;
 
         this->MonsterAttackDamage = getDamage;
 
