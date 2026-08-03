@@ -118,7 +118,7 @@ int UIManager::PrintMenu() const
 	screen.AddLine(emptyLine, LineType::out);
 	screen.AddLine("Enter : ", LineType::in);
 
-
+	ClearConsole();
 	for (int i = 0; i < screen.GetDataSize(); ++i)
 	{
 		screen.PrintLine(i);
@@ -325,6 +325,54 @@ int UIManager::PrintBattleLog(
 
 	if (!screen.GetHasInput())
 	{
+		return -1;
+	}
+
+	return GetInput(screen, menuMin, menuMax);
+}
+
+int UIManager::PrintBattleResult(const Player& player, const Monster& monster) const
+{
+	ScreenData screen;
+	int menuMin = 0;
+	int menuMax = 0;
+	std::string temp;
+
+	screen.AddLine(border, LineType::out);
+	screen.AddLine("재료를 손에 넣었다.", LineType::out);
+	screen.AddLine(border, LineType::out);
+	
+	temp = "획득한 골드: " + std::to_string(monster.GetDropGold());
+	screen.AddLine(temp, LineType::out);
+
+	const int IngredientId = monster.GetDropIngredientId();
+	const int IngredientAmount = monster.GetDropIngredientAmount();
+	const InventorySlot* RewardSlot =
+		player.GetInventory().FindSlot(IngredientId);
+
+	if (RewardSlot != nullptr && RewardSlot->ItemPtr != nullptr)
+	{
+		temp = "획득한 " + RewardSlot->ItemPtr->GetName() + ": " + std::to_string(IngredientAmount) + "개";
+		screen.AddLine(temp, LineType::out);
+		temp = "총 " + RewardSlot->ItemPtr->GetName() + ": " + std::to_string(RewardSlot->Count) + "개";
+		screen.AddLine(temp, LineType::out);
+	}
+
+	std::cout << "Total Gold: "
+		<< player.GetGold() << "\n\n";
+	temp = "총 골드: " + std::to_string(player.GetGold());
+	screen.AddLine(temp, LineType::out);
+	screen.AddLine(border, LineType::out);
+
+	ClearConsole();
+	for (size_t i = 0; i < screen.GetDataSize(); ++i)
+	{
+		screen.PrintLine(i);
+	}
+
+	if (!screen.GetHasInput())
+	{
+		WaitOutputDelay(500, 4);
 		return -1;
 	}
 

@@ -74,7 +74,7 @@ void GameManager::RunTutorial()
         }
 
         ApplyBattleReward(CurrentMonster);
-        PrintBattleReward(CurrentMonster);
+        UI.PrintBattleResult(PlayerCharacter, CurrentMonster);
 
         PlayerCharacter.SetCurrentHp(
             PlayerCharacter.GetMaxHp()
