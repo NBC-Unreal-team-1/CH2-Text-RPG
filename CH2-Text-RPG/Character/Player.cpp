@@ -91,3 +91,13 @@ const Skill* Player::GetSkillById(int Id) const
     }
     return nullptr;
 }
+
+bool Player::SpendGold(int amount)
+{
+    if (amount <= 0 || amount > Gold)
+    {
+        return false;
+    }
+    Gold -= amount;
+    return true;
+}

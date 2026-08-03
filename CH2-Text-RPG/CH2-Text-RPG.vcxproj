@@ -144,6 +144,7 @@
     <ClInclude Include="Inventory\Potion.h" />
     <ClInclude Include="Recipe\Recipe.h" />
     <ClInclude Include="Recipe\RecipeManager.h" />
+    <ClInclude Include="Shop\ShopItem.h" />
     <ClInclude Include="Shop\ShopManager.h" />
     <ClInclude Include="Skill.h" />
     <ClInclude Include="UI\ConsoleUtils.h" />
