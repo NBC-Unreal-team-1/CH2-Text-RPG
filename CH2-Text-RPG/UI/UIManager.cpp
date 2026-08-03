@@ -260,9 +260,9 @@ void SetBattleLog(const BattleInfo& currentLog, ScreenData& data, std::string bo
 	std::string resultText;
 	std::string temp;
 
-	playerTurn = "플레이어의 공격!\n몬스터에게 "
+	playerTurn = "플레이어의 공격!\n" + currentLog.MonsterName +"에게 "
 		+ std::to_string(currentLog.PlayerAttackDamage) + "의 데미지!";
-	monsterTurn = "몬스터의 공격!\n플레이어에게 "
+	monsterTurn = currentLog.MonsterName + "의 공격!\n플레이어에게 "
 		+ std::to_string(currentLog.MonsterAttackDamage) + "의 데미지!";
 	resultText = "남은 체력\n플레이어: " + std::to_string(currentLog.PlayerRemainingHP)
 		+ " / 몬스터: " + std::to_string(currentLog.MonsterRemainingHP);
@@ -319,7 +319,8 @@ int UIManager::PrintBattleLog(
 		screen.PrintLine(i);
 		if (screen.CheckIsWait(i))
 		{
-			WaitOutputDelay();
+			WaitOutputDelay(1000, 3);
+			screen.ResetToCeiling();
 		}
 	}
 

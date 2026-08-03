@@ -75,7 +75,7 @@ void ScreenData::ResetToCeiling()
 	}
 
 	ClearConsole();
-	for (int i = 0; i < resetPos; ++i)
+	for (int i = 0; i <= resetPos; ++i)
 	{
 		PrintLine(i);
 	}
