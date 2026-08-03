@@ -145,7 +145,8 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 	for (int i = 0; i < inventory.GetItems().size(); ++i)
 	{
 		std::string itemName = inventory.GetItems()[i].ItemPtr->GetName();
-		itemName = std::to_string(i + 1) + ": " + itemName;
+		itemName = std::to_string(i + 1) + ": " + itemName +
+			" (" + std::to_string(inventory.GetItemCount(inventory.GetItems()[i].ItemPtr->GetId())) + " ea)";
 		screen.AddLine(itemName, LineType::out);
 	}
 	screen.AddLine("0 : exit", LineType::out);
@@ -241,6 +242,7 @@ int UIManager::PrintSelectedRecipe(const Recipe* recipe, const Inventory& invent
 		+ "\n방어력 증가: " + std::to_string(recipe->DefenseBonus);
 	screen.AddLine(temp, LineType::out);
 	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("1: 제작", LineType::out);
 	screen.AddLine("0 : exit", LineType::out);
 	screen.AddLine(emptyLine, LineType::out);
 	screen.AddLine(border, LineType::out);
