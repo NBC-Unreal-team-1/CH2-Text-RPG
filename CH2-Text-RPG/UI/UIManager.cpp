@@ -1,5 +1,7 @@
 ﻿#include "UIManager.h"
 
+#include "../Character/Monster.h"
+
 UIManager::UIManager()
 {
 }
@@ -286,6 +288,16 @@ int UIManager::PrintBattleLog(
 	screen.AddLine(border, LineType::out);
 	screen.AddLine("세계 최고의 햄버거를 만들기 위하여.", LineType::out);
 	screen.AddLine(border, LineType::out);
+	if (!BattleLogs.empty())
+	{
+		const BattleInfo& FirstLog = BattleLogs.front();
+		screen.AddLine("[" + FirstLog.MonsterName + "]", LineType::out);
+		screen.AddLine(
+			Monster::GetAsciiArtById(FirstLog.MonsterId),
+			LineType::out
+		);
+		screen.AddLine(border, LineType::out);
+	}
 	screen.AddLine(emptyLine, LineType::ceiling);
 
 	for (std::size_t Index = 0; Index < BattleLogs.size(); ++Index)

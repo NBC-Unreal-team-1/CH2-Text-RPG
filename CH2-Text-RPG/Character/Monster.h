@@ -2,6 +2,8 @@
 
 #include "Character.h"
 
+#include <string>
+
 enum class MonsterType
 {
     Lettuce,
@@ -27,6 +29,7 @@ public:
     void GenerateStat();
 
     int GetId() const;
+    static const std::string& GetAsciiArtById(int MonsterId);
     MonsterType GetMonsterId() const;
     int GetDropGold() const;
 
