@@ -29,7 +29,7 @@ public:
     void GenerateStat();
 
     int GetId() const;
-    static const std::string& GetAsciiArtById(int MonsterId);
+    static std::string GetAsciiArtAssetNameById(int MonsterId);
     MonsterType GetMonsterId() const;
     int GetDropGold() const;
 

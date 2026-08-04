@@ -152,6 +152,17 @@
     <ClInclude Include="UI\UIManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\BurgerQuestMain.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\Monster\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Assets\UI\*.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="Battle\BattleManager.cpp" />
     <ClCompile Include="Battle\BattleResult.cpp" />
     <ClCompile Include="Character\Character.cpp" />

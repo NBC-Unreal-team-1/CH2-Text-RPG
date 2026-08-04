@@ -1,6 +1,490 @@
-Ôªø#include "UIManager.h"
+#include "UIManager.h"
 
-#include "../Character/Monster.h"
+#include <fstream>
+#include <limits>
+#include <sstream>
+
+namespace
+{
+    constexpr int ScreenWidth = 174;
+    constexpr int ScreenHeight = 59;
+    constexpr int LeftWidth = 136;
+    constexpr int TopHeight = 46;
+
+    void WriteAt(int X, int Y, const std::string& Text)
+    {
+        MoveCursor(X, Y);
+        std::cout << Text;
+    }
+
+    void WriteWideAt(int X, int Y, const std::wstring& Text)
+    {
+        MoveCursor(X, Y);
+        DWORD Written = 0;
+        WriteConsoleW(
+            GetStdHandle(STD_OUTPUT_HANDLE),
+            Text.c_str(),
+            static_cast<DWORD>(Text.size()),
+            &Written,
+            nullptr
+        );
+    }
+
+    void ConfigureConsoleWindow()
+    {
+        static bool IsConfigured = false;
+        if (IsConfigured)
+        {
+            return;
+        }
+
+        const HANDLE OutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+        CONSOLE_FONT_INFOEX FontInfo = {};
+        FontInfo.cbSize = sizeof(CONSOLE_FONT_INFOEX);
+        if (GetCurrentConsoleFontEx(OutputHandle, FALSE, &FontInfo))
+        {
+            FontInfo.dwFontSize.X = 0;
+            FontInfo.dwFontSize.Y = 14;
+            SetCurrentConsoleFontEx(OutputHandle, FALSE, &FontInfo);
+        }
+
+        CONSOLE_SCREEN_BUFFER_INFO BufferInfo;
+        if (!GetConsoleScreenBufferInfo(OutputHandle, &BufferInfo))
+        {
+            return;
+        }
+
+        COORD BufferSize = BufferInfo.dwSize;
+        BufferSize.X = static_cast<SHORT>(
+            (std::max)(static_cast<int>(BufferSize.X), ScreenWidth + 2)
+        );
+        BufferSize.Y = static_cast<SHORT>(
+            (std::max)(static_cast<int>(BufferSize.Y), ScreenHeight + 2)
+        );
+        SetConsoleScreenBufferSize(OutputHandle, BufferSize);
+
+        const COORD MaximumWindowSize = GetLargestConsoleWindowSize(OutputHandle);
+        const SHORT WindowWidth = MaximumWindowSize.X > 0
+            ? (std::min)(static_cast<SHORT>(ScreenWidth), MaximumWindowSize.X)
+            : static_cast<SHORT>(ScreenWidth);
+        const SHORT WindowHeight = MaximumWindowSize.Y > 0
+            ? (std::min)(static_cast<SHORT>(ScreenHeight + 1), MaximumWindowSize.Y)
+            : static_cast<SHORT>(ScreenHeight + 1);
+        const SMALL_RECT WindowRect = {
+            0,
+            0,
+            static_cast<SHORT>(WindowWidth - 1),
+            static_cast<SHORT>(WindowHeight - 1)
+        };
+        SetConsoleWindowInfo(OutputHandle, TRUE, &WindowRect);
+        IsConfigured = true;
+    }
+
+    void DrawHorizontal(
+        int Y,
+        wchar_t Left,
+        wchar_t Center,
+        wchar_t Right
+    )
+    {
+        std::wstring Line;
+        Line += Left;
+        Line += std::wstring(LeftWidth - 1, L'¶¨');
+        Line += Center;
+        Line += std::wstring(ScreenWidth - LeftWidth - 2, L'¶¨');
+        Line += Right;
+
+        WriteWideAt(
+            0,
+            Y,
+            Line
+        );
+    }
+
+    void DrawFrame()
+    {
+        ConfigureConsoleWindow();
+
+        DrawHorizontal(0, L'¶Æ', L'¶≥', L'¶Ø');
+        DrawHorizontal(TopHeight, L'¶≤', L'¶∂', L'¶¥');
+        DrawHorizontal(ScreenHeight, L'¶±', L'¶µ', L'¶∞');
+
+        for (int Y = 1; Y < ScreenHeight; ++Y)
+        {
+            WriteWideAt(0, Y, L"¶≠");
+            WriteWideAt(LeftWidth, Y, L"¶≠");
+            WriteWideAt(ScreenWidth - 1, Y, L"¶≠");
+        }
+    }
+
+    void WriteBlock(
+        int X,
+        int Y,
+        int MaxRows,
+        const std::vector<std::string>& Lines
+    )
+    {
+        int Row = 0;
+        for (const std::string& Text : Lines)
+        {
+            std::stringstream Stream(Text);
+            std::string Line;
+            while (Row < MaxRows && std::getline(Stream, Line))
+            {
+                WriteAt(X, Y + Row, Line);
+                ++Row;
+            }
+            if (Row >= MaxRows)
+            {
+                break;
+            }
+        }
+    }
+
+    std::wstring Utf8ToWide(const std::string& Text)
+    {
+        if (Text.empty())
+        {
+            return {};
+        }
+
+        const int Length = MultiByteToWideChar(
+            CP_UTF8,
+            MB_ERR_INVALID_CHARS,
+            Text.data(),
+            static_cast<int>(Text.size()),
+            nullptr,
+            0
+        );
+        if (Length <= 0)
+        {
+            return std::wstring(Text.begin(), Text.end());
+        }
+
+        std::wstring Result(Length, L'\0');
+        MultiByteToWideChar(
+            CP_UTF8,
+            MB_ERR_INVALID_CHARS,
+            Text.data(),
+            static_cast<int>(Text.size()),
+            Result.data(),
+            Length
+        );
+        return Result;
+    }
+
+    std::string WideToUtf8(const std::wstring& Text)
+    {
+        if (Text.empty())
+        {
+            return {};
+        }
+
+        const int Length = WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            Text.data(),
+            static_cast<int>(Text.size()),
+            nullptr,
+            0,
+            nullptr,
+            nullptr
+        );
+        std::string Result(Length, '\0');
+        WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            Text.data(),
+            static_cast<int>(Text.size()),
+            Result.data(),
+            Length,
+            nullptr,
+            nullptr
+        );
+        return Result;
+    }
+
+    void WriteArtBlock(
+        int X,
+        int Y,
+        int MaxRows,
+        const std::vector<std::string>& Lines,
+        int HorizontalOffset = 0
+    )
+    {
+        const int RowCount = (std::min)(MaxRows, static_cast<int>(Lines.size()));
+        const int ArtAreaWidth = LeftWidth - X;
+        const int StartY = Y + (MaxRows - RowCount) / 2;
+        int ArtWidth = 0;
+        for (int Row = 0; Row < RowCount; ++Row)
+        {
+            ArtWidth = (std::max)(
+                ArtWidth,
+                static_cast<int>(Utf8ToWide(Lines[Row]).size())
+            );
+        }
+        const int StartX = X + (std::max)(0, (ArtAreaWidth - ArtWidth) / 2) +
+            HorizontalOffset;
+
+        for (int Row = 0; Row < RowCount; ++Row)
+        {
+            const std::wstring WideLine = Utf8ToWide(Lines[Row]);
+            WriteWideAt(StartX, StartY + Row, WideLine);
+        }
+    }
+
+    void ClearArtBlock()
+    {
+        const std::wstring EmptyLine(LeftWidth - 2, L' ');
+        for (int Row = 0; Row < TopHeight - 3; ++Row)
+        {
+            WriteWideAt(2, 2 + Row, EmptyLine);
+        }
+    }
+
+    void AnimateMonsterHit(const std::vector<std::string>& ArtLines)
+    {
+        constexpr int HitOffsets[5] = { -5, 4, -3, 2, 0 };
+        for (const int Offset : HitOffsets)
+        {
+            ClearArtBlock();
+            WriteArtBlock(2, 2, TopHeight - 3, ArtLines, Offset);
+            Sleep(75);
+        }
+    }
+
+    void AnimateMonsterDefeat(const std::vector<std::string>& ArtLines)
+    {
+        constexpr int FlashFrameCount = 6;
+        for (int Frame = 0; Frame < FlashFrameCount; ++Frame)
+        {
+            ClearArtBlock();
+            if (Frame % 2 == 0)
+            {
+                WriteArtBlock(2, 2, TopHeight - 3, ArtLines);
+            }
+            Sleep(120);
+        }
+        ClearArtBlock();
+        Sleep(250);
+    }
+
+    std::vector<std::string> LoadArtAsset(const std::string& AssetName)
+    {
+        const std::vector<std::string> CandidatePaths = {
+            "Assets/" + AssetName,
+            "CH2-Text-RPG/Assets/" + AssetName,
+            "../../Assets/" + AssetName
+        };
+
+        std::ifstream File;
+        for (const std::string& Path : CandidatePaths)
+        {
+            File.open(Path, std::ios::binary);
+            if (File.is_open())
+            {
+                break;
+            }
+            File.clear();
+        }
+
+        if (!File.is_open())
+        {
+            return { "ASCII ART NOT FOUND: " + AssetName };
+        }
+
+        std::vector<std::string> Lines;
+        std::string Line;
+        while (std::getline(File, Line))
+        {
+            if (!Line.empty() && Line.back() == '\r')
+            {
+                Line.pop_back();
+            }
+            Lines.push_back(Line);
+        }
+
+        while (!Lines.empty() && Lines.front().empty())
+        {
+            Lines.erase(Lines.begin());
+        }
+        while (!Lines.empty() && Lines.back().empty())
+        {
+            Lines.pop_back();
+        }
+
+        std::size_t CommonIndent = std::string::npos;
+        for (const std::string& CurrentLine : Lines)
+        {
+            if (CurrentLine.empty())
+            {
+                continue;
+            }
+            CommonIndent = (std::min)(CommonIndent, CurrentLine.find_first_not_of(' '));
+        }
+        if (CommonIndent != std::string::npos && CommonIndent > 0)
+        {
+            for (std::string& CurrentLine : Lines)
+            {
+                CurrentLine.erase(0, (std::min)(CommonIndent, CurrentLine.size()));
+            }
+        }
+        return Lines;
+    }
+
+    std::vector<std::string> LoadUiArtAsset(const std::string& AssetName)
+    {
+        const std::vector<std::string> SourceLines = LoadArtAsset(AssetName);
+        if (SourceLines.empty())
+        {
+            return SourceLines;
+        }
+
+        constexpr int TargetWidth = LeftWidth - 2;
+        constexpr int TargetHeight = TopHeight - 3;
+        std::vector<std::wstring> WideSourceLines;
+        int SourceWidth = 0;
+        for (const std::string& SourceLine : SourceLines)
+        {
+            WideSourceLines.push_back(Utf8ToWide(SourceLine));
+            SourceWidth = (std::max)(
+                SourceWidth,
+                static_cast<int>(WideSourceLines.back().size())
+            );
+        }
+
+        wchar_t Background = L' ';
+        for (const wchar_t Character : WideSourceLines.front())
+        {
+            if (Character != L' ')
+            {
+                Background = Character;
+                break;
+            }
+        }
+
+        std::vector<std::string> Result;
+        Result.reserve(TargetHeight);
+        for (int TargetRow = 0; TargetRow < TargetHeight; ++TargetRow)
+        {
+            int SourceRow = 0;
+            if (static_cast<int>(WideSourceLines.size()) > TargetHeight)
+            {
+                SourceRow = TargetRow * static_cast<int>(WideSourceLines.size()) /
+                    TargetHeight;
+            }
+            else
+            {
+                const int TopPadding =
+                    (TargetHeight - static_cast<int>(WideSourceLines.size())) / 2;
+                if (TargetRow < TopPadding ||
+                    TargetRow >= TopPadding + static_cast<int>(WideSourceLines.size()))
+                {
+                    Result.push_back(WideToUtf8(std::wstring(TargetWidth, Background)));
+                    continue;
+                }
+                SourceRow = TargetRow - TopPadding;
+            }
+
+            std::wstring Canvas(TargetWidth, Background);
+            const std::wstring& SourceLine = WideSourceLines[SourceRow];
+            if (SourceWidth <= TargetWidth)
+            {
+                const int StartX = (TargetWidth - SourceWidth) / 2;
+                for (std::size_t Index = 0;
+                    Index < SourceLine.size() && StartX + Index < Canvas.size();
+                    ++Index)
+                {
+                    Canvas[StartX + Index] = SourceLine[Index];
+                }
+            }
+            else
+            {
+                for (int TargetColumn = 0; TargetColumn < TargetWidth; ++TargetColumn)
+                {
+                    const int SourceColumn = TargetColumn * SourceWidth / TargetWidth;
+                    if (SourceColumn < static_cast<int>(SourceLine.size()))
+                    {
+                        Canvas[TargetColumn] = SourceLine[SourceColumn];
+                    }
+                }
+            }
+            Result.push_back(WideToUtf8(Canvas));
+        }
+        return Result;
+    }
+
+    std::vector<std::wstring> ScaleArtToCanvas(
+        const std::vector<std::string>& SourceLines,
+        int TargetWidth,
+        int TargetHeight
+    )
+    {
+        if (SourceLines.empty())
+        {
+            return std::vector<std::wstring>(
+                TargetHeight,
+                std::wstring(TargetWidth, L' ')
+            );
+        }
+
+        std::vector<std::wstring> WideSourceLines;
+        int SourceWidth = 0;
+        for (const std::string& SourceLine : SourceLines)
+        {
+            WideSourceLines.push_back(Utf8ToWide(SourceLine));
+            SourceWidth = (std::max)(
+                SourceWidth,
+                static_cast<int>(WideSourceLines.back().size())
+            );
+        }
+
+        wchar_t Background = L' ';
+        for (const wchar_t Character : WideSourceLines.front())
+        {
+            if (Character != L' ')
+            {
+                Background = Character;
+                break;
+            }
+        }
+
+        std::vector<std::wstring> Result(
+            TargetHeight,
+            std::wstring(TargetWidth, Background)
+        );
+        for (int TargetRow = 0; TargetRow < TargetHeight; ++TargetRow)
+        {
+            const int SourceRow = TargetRow *
+                static_cast<int>(WideSourceLines.size()) / TargetHeight;
+            const std::wstring& SourceLine = WideSourceLines[SourceRow];
+
+            for (int TargetColumn = 0; TargetColumn < TargetWidth; ++TargetColumn)
+            {
+                const int SourceColumn = TargetColumn * SourceWidth / TargetWidth;
+                if (SourceColumn < static_cast<int>(SourceLine.size()))
+                {
+                    Result[TargetRow][TargetColumn] = SourceLine[SourceColumn];
+                }
+            }
+        }
+        return Result;
+    }
+
+    std::string GetSkillTriggerText(const Skill& CurrentSkill)
+    {
+        switch (CurrentSkill.GetTriggerType())
+        {
+        case SkillTriggerType::EveryNthTurn:
+            return std::to_string(CurrentSkill.GetTriggerValue()) + "≈œ∏∂¥Ÿ ¿⁄µø ªÁøÎ";
+        case SkillTriggerType::PlayerHpBelow:
+            return "HP " + std::to_string(CurrentSkill.GetTriggerValue()) +
+                "% ¿Ã«œø°º≠ ¿⁄µø ªÁøÎ";
+        default:
+            return "¿⁄µø ªÁøÎ";
+        }
+    }
+}
 
 UIManager::UIManager()
 {
@@ -8,635 +492,521 @@ UIManager::UIManager()
 
 UIManager::~UIManager()
 {
-	// TODO: Implement UI manager destruction.
 }
 
-static void WaitOutputDelay(int time = 300, int count = 3)
+void UIManager::PrintTitleSplash() const
 {
-	FlushInput();
-	std::cout << "Wait";
-	for (int i = 0; i < count; ++i)
-	{
-		std::cout << ". ";
-		Sleep(time);
-	}
-	FlushInput();
-	std::cout << std::endl << std::endl;
+    constexpr int FullScreenHeight = ScreenHeight + 1;
+    const std::vector<std::wstring> TitleArt = ScaleArtToCanvas(
+        LoadArtAsset("BurgerQuestMain.txt"),
+        ScreenWidth,
+        FullScreenHeight
+    );
+
+    ClearConsole();
+    ConfigureConsoleWindow();
+    CONSOLE_CURSOR_INFO CursorInfo;
+    const HANDLE OutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (GetConsoleCursorInfo(OutputHandle, &CursorInfo))
+    {
+        CursorInfo.bVisible = FALSE;
+        SetConsoleCursorInfo(OutputHandle, &CursorInfo);
+    }
+    Sleep(5000);
+
+    const DWORD FrameDelay = 3000 / FullScreenHeight;
+    const std::wstring EmptyLine(ScreenWidth, L' ');
+    for (int FrameLineCount = 1;
+        FrameLineCount <= FullScreenHeight;
+        ++FrameLineCount)
+    {
+        for (int Row = 0; Row < FullScreenHeight; ++Row)
+        {
+            WriteWideAt(0, Row, EmptyLine);
+        }
+
+        const int StartY = FullScreenHeight - FrameLineCount;
+        for (int Row = 0; Row < FrameLineCount; ++Row)
+        {
+            WriteWideAt(0, StartY + Row, TitleArt[Row]);
+        }
+        Sleep(FrameDelay);
+    }
+    Sleep(1000);
+
+    if (GetConsoleCursorInfo(OutputHandle, &CursorInfo))
+    {
+        CursorInfo.bVisible = TRUE;
+        SetConsoleCursorInfo(OutputHandle, &CursorInfo);
+    }
 }
 
-static int GetInt(ScreenData& screen)
+void UIManager::RenderLayout(
+    const std::string& Title,
+    const std::vector<std::string>& ArtLines,
+    const std::vector<std::string>& Options,
+    const std::vector<std::string>& Logs,
+    const std::string& Prompt
+) const
 {
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	std::string in;
-	std::getline(std::cin, in);
+    ClearConsole();
+    DrawFrame();
 
-	try
-	{
-		if (stoi(in) < 0)
-		{
-			return -1;
-		}
-		if (!std::all_of(in.begin(), in.end(), ::isdigit))
-		{
-			return -1;
-		}
+    WriteAt(2, 0, "[ " + Title + " / ART ]");
+    WriteAt(LeftWidth + 2, 0, "[ OPTIONS ]");
+    WriteAt(2, TopHeight, "[ LOG ]");
+    WriteAt(LeftWidth + 2, TopHeight, "[ INPUT ]");
 
-		return stoi(in);
-	}
-	catch (const std::invalid_argument&)
-	{
-		screen.MoveToInputPos();
-		std::cout << "Ïà´ÏûêÎßå ÏûÖÎ†•ÌïòÏÑ∏Ïöî.";
-		Sleep(1000);
-		screen.MoveToInputPos();
-		screen.ClearInput();
-		FlushInput();
-		return -1;
-	}
-	catch (const std::out_of_range&)
-	{
-		screen.MoveToInputPos();
-		std::cout << "ÏàòÏùò Î≤îÏúÑÎ•º Î≤óÏñ¥ÎÇ¨ÏäµÎãàÎã§.";
-		std::cout << ClearToEndOfLine(csbi.dwCursorPosition.X);
-		Sleep(1000);
-		screen.MoveToInputPos();
-		screen.ClearInput();
-		FlushInput();
-		return -1;
-	}
+    WriteArtBlock(2, 2, TopHeight - 3, ArtLines);
+    WriteBlock(LeftWidth + 2, 2, TopHeight - 3, Options);
+    WriteBlock(2, TopHeight + 2, ScreenHeight - TopHeight - 3, Logs);
+    WriteBlock(
+        LeftWidth + 2,
+        TopHeight + 2,
+        ScreenHeight - TopHeight - 3,
+        { Prompt }
+    );
+
+    MoveCursor(LeftWidth + 2, TopHeight + 4);
 }
 
-int UIManager::GetInput(ScreenData& screen, int min, int max) const
+int UIManager::ReadChoice(int Min, int Max) const
 {
-	int result;
-	while (true)
-	{
-		screen.MoveToInputPos();
-		std::cout << min << "Î∂ÄÌÑ∞ " << max << " ÏÇ¨Ïù¥Ïùò Í∞íÏùÑ ÏûÖÎ†•ÌïòÏÑ∏Ïöî.";
-		Sleep(1000);
-		screen.ClearInput();
-		screen.MoveToInputPos();
-		result = GetInt(screen);
-		if (result <= max && result >= min)
-		{
-			break;
-		}
-	}
-	ClearConsole();
-	return result;
+    while (true)
+    {
+        MoveCursor(LeftWidth + 2, TopHeight + 4);
+        std::cout << "> " << std::string(ScreenWidth - LeftWidth - 6, ' ');
+        MoveCursor(LeftWidth + 4, TopHeight + 4);
+
+        std::string Input;
+        std::getline(std::cin, Input);
+
+        try
+        {
+            std::size_t ParsedLength = 0;
+            const int Choice = std::stoi(Input, &ParsedLength);
+            if (ParsedLength == Input.size() && Choice >= Min && Choice <= Max)
+            {
+                return Choice;
+            }
+        }
+        catch (const std::exception&)
+        {
+        }
+
+        WriteAt(
+            LeftWidth + 2,
+            TopHeight + 6,
+            std::to_string(Min) + "~" + std::to_string(Max) +
+                " ªÁ¿Ã¿« º˝¿⁄∏¶ ¿‘∑¬«œººø‰."
+        );
+    }
+}
+
+void UIManager::WaitForContinue(const std::string& Prompt) const
+{
+    WriteAt(LeftWidth + 2, TopHeight + 4, Prompt);
+    MoveCursor(LeftWidth + 2, TopHeight + 6);
+    std::string Input;
+    std::getline(std::cin, Input);
 }
 
 void UIManager::SetupPlayerInfo(Player& player)
 {
-	std::string name;
-	int maxHp = 30;
-	int power = 7;
+    RenderLayout(
+        "PLAYER SETUP",
+        {},
+        { "«√∑π¿ÃæÓ ª˝º∫" },
+        { "ºº∞Ë √÷∞Ì¿« «‹πˆ∞≈∏¶ ∏∏µÈ ø©«‡¿ª ¡ÿ∫Ò«’¥œ¥Ÿ." },
+        "«√∑π¿ÃæÓ ¿Ã∏ß¿ª ¿‘∑¬«œººø‰."
+    );
 
-	std::cout << "Name : ";
-	std::getline(std::cin, name);
-	ClearLine(0, 0);
-
-
-	player.SetName(name);
-	player.SetMaxHp(maxHp);
-	player.SetCurrentHp(maxHp);
-	player.SetPower(power);
+    std::string Name;
+    std::getline(std::cin, Name);
+    player.SetName(Name);
+    player.SetMaxHp(30);
+    player.SetCurrentHp(30);
+    player.SetPower(7);
 }
 
 int UIManager::PrintMenu() const
 {
-	int menuMin = 0;
-	int menuMax = 4;
-	ScreenData screen;
-	screen.AddLine(border, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine("1: Ïó¨ÌñâÏùÑ Îñ†ÎÇòÏöî Ï¶êÍ±∞Ïö¥ ÎßàÏùåÏúºÎ°ú Ìô©Í∏àÎπõ ÌÉúÏñë Ï∂ïÏ†úÎ•º Ïó¨Îäî~", LineType::out);
-	screen.AddLine("2: ÎπàÏÜêÏúºÎ°ú Ïó¨ÌñâÏùÑ Îñ†ÎÇú ÎÇòÏóêÍ≤å ÎÇ®ÏùÄ Í≤ÉÏù¥ÎùºÍ≥§...", LineType::out);
-	screen.AddLine("3: ÏßÑÏ†ïÌïú ÎßõÏùÄ Ïû¨Î£åÏôÄ Ï†ïÏÑ±ÏóêÏÑú ÏãúÏûëÎêúÎã§.", LineType::out);
-	screen.AddLine("4: ÏÉÅÏ†êÏùÑ Ïù¥Ïö©Ìï©ÎãàÎã§.", LineType::out);
-	screen.AddLine("0: Í≤åÏûÑÏùÑ Ï¢ÖÎ£åÌï©ÎãàÎã§.", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-
-	if (!screen.GetHasInput())
-	{
-		return -1;
-	}
-
-	return GetInput(screen, menuMin, menuMax);
+    RenderLayout(
+        "MAIN MENU",
+        LoadUiArtAsset("UI/CampFire.txt"),
+        {
+            "1. ¿¸≈ı",
+            "2. ¿Œ∫•≈‰∏Æ",
+            "3. ø‰∏Æ",
+            "4. ªÛ¡°",
+            "0. ∞‘¿” ¡æ∑·"
+        },
+        { "ºº∞Ë √÷∞Ì¿« «‹πˆ∞≈∏¶ ∏∏µÈ±‚ ¿ß«— ø©¡§¿ª º±≈√«œººø‰." },
+        "∏ﬁ¥∫ π¯»£∏¶ ¿‘∑¬«œººø‰."
+    );
+    return ReadChoice(0, 4);
 }
 
 int UIManager::PrintInventory(const Inventory& inventory) const
 {
-	int menuMin = 0;
-	int menuMax;
-	ScreenData screen;
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("ÏïÑÏù¥ÌÖú Î™©Î°ù", LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	for (int i = 0; i < inventory.GetItems().size(); ++i)
-	{
-		std::string itemName = inventory.GetItems()[i].ItemPtr->GetName();
-		itemName = std::to_string(i + 1) + ": " + itemName +
-			" (" + std::to_string(inventory.GetItemCount(inventory.GetItems()[i].ItemPtr->GetId())) + " ea)";
-		screen.AddLine(itemName, LineType::out);
-	}
-	screen.AddLine("0 : exit", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-	menuMax = static_cast<int>(inventory.GetItems().size());
+    std::vector<std::string> Options;
+    const std::vector<InventorySlot>& Items = inventory.GetItems();
+    for (std::size_t Index = 0; Index < Items.size(); ++Index)
+    {
+        Options.push_back(
+            std::to_string(Index + 1) + ". " + Items[Index].ItemPtr->GetName() +
+            " (" + std::to_string(Items[Index].Count) + ")"
+        );
+    }
+    Options.push_back("0. µπæ∆∞°±‚");
 
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-
-	if (!screen.GetHasInput())
-	{
-		return -1;
-	}
-
-	return GetInput(screen, menuMin, menuMax);
+    RenderLayout(
+        "INVENTORY",
+        LoadUiArtAsset("UI/Inventory.txt"),
+        Options,
+        { "∫∏¿Ø ¡ﬂ¿Œ æ∆¿Ã≈€∞˙ ºˆ∑Æ¿‘¥œ¥Ÿ." },
+        "»Æ¿Œ«“ æ∆¿Ã≈€ π¯»£∏¶ ¿‘∑¬«œººø‰."
+    );
+    return ReadChoice(0, static_cast<int>(Items.size()));
 }
 
-int UIManager::PrintRecipes(const RecipeManager& recipes, const Inventory& inventory) const
+int UIManager::PrintRecipes(
+    const RecipeManager& recipes,
+    const Inventory& inventory
+) const
 {
-	int menuMin = 0;
-	int menuMax;
-	ScreenData screen;
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Î†àÏãúÌîº Î™©Î°ù", LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	for (int i = 0; i < recipes.GetAllRecipes().size(); ++i)
-	{
-		std::string text = recipes.GetAllRecipes()[i]->Name;
-		text = std::to_string(i + 1) + ": " + text;
-		screen.AddLine(text, LineType::out);
-	}
-	screen.AddLine("0 : exit", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-	menuMax = static_cast<int>(recipes.GetAllRecipes().size());
+    std::vector<std::string> Options;
+    const std::vector<const Recipe*>& Recipes = recipes.GetAllRecipes();
+    for (std::size_t Index = 0; Index < Recipes.size(); ++Index)
+    {
+        Options.push_back(std::to_string(Index + 1) + ". " + Recipes[Index]->Name);
+    }
+    Options.push_back("0. µπæ∆∞°±‚");
 
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-
-	if (!screen.GetHasInput())
-	{
-		return -1;
-	}
-
-	int choice = GetInput(screen, menuMin, menuMax);
-	if (choice != 0)
-	{
-		if (PrintSelectedRecipe(
-			recipes.GetAllRecipes()[choice - 1],
-			inventory
-		) != 1)
-		{
-			return 0;
-		}
-	}
-
-	return choice;
+    RenderLayout(
+        "RECIPES",
+        LoadUiArtAsset("UI/Cook.txt"),
+        Options,
+        { "¡¶¿€«“ ø‰∏Æ∏¶ º±≈√«œººø‰." },
+        "∑πΩ√«« π¯»£∏¶ ¿‘∑¬«œººø‰."
+    );
+    const int Choice = ReadChoice(0, static_cast<int>(Recipes.size()));
+    if (Choice != 0 && PrintSelectedRecipe(Recipes[Choice - 1], inventory) != 1)
+    {
+        return 0;
+    }
+    return Choice;
 }
 
-int UIManager::PrintSelectedRecipe(const Recipe* recipe, const Inventory& inventory) const
+int UIManager::PrintSelectedRecipe(
+    const Recipe* recipe,
+    const Inventory& inventory
+) const
 {
-	ScreenData screen;
-	int menuMin = 0;
-	int menuMax = 1;
-	std::string temp;
-	int curQty;
-	int reqQty;
+    std::vector<std::string> Logs = { "[« ø‰ ¿Á∑·]" };
+    for (const RecipeIngredient& Ingredient : recipe->Ingredients)
+    {
+        Logs.push_back(
+            Item::GetNameById(Ingredient.ItemId) + " " +
+            std::to_string(inventory.GetItemCount(Ingredient.ItemId)) + "/" +
+            std::to_string(Ingredient.Count)
+        );
+    }
+    Logs.push_back(
+        "»ø∞˙: HP +" + std::to_string(recipe->HpBonus) +
+        ", ∞¯∞› +" + std::to_string(recipe->AttackBonus) +
+        ", πÊæÓ +" + std::to_string(recipe->DefenseBonus)
+    );
 
-	screen.AddLine(border, LineType::out);
-	temp = "[" + recipe->Name + "Ïùò Î†àÏãúÌîº]";
-	screen.AddLine(temp, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine("---(ÌïÑÏöîÌïú Í≤ÉÎì§)---", LineType::out);
-	for (int i = 0; i < recipe->Ingredients.size(); ++i)
-	{
-		int curIngredientId = recipe->Ingredients[i].ItemId;
-		temp = Item::GetNameById(curIngredientId);
-		curQty = inventory.GetItemCount(curIngredientId);
-		reqQty = recipe->Ingredients[i].Count;
-		temp = std::to_string(i + 1) + ": " + temp
-			+ "(" + std::to_string(curQty) + " / " + std::to_string(reqQty) + ")";
-		screen.AddLine(temp, LineType::out);
-	}
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine("---(Ìö®Í≥º)---", LineType::out);
-	temp = "Ï≤¥Î†• Ï¶ùÍ∞Ä: " + std::to_string(recipe->HpBonus)
-		+ "\nÍ≥µÍ≤©Î†• Ï¶ùÍ∞Ä: " + std::to_string(recipe->AttackBonus)
-		+ "\nÎ∞©Ïñ¥Î†• Ï¶ùÍ∞Ä: " + std::to_string(recipe->DefenseBonus);
-	screen.AddLine(temp, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine("1: Ï†úÏûë", LineType::out);
-	screen.AddLine("0 : exit", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-	
-	return GetInput(screen, menuMin, menuMax);
+    RenderLayout(
+        recipe->Name,
+        LoadUiArtAsset("UI/Cook.txt"),
+        { "1. ¡¶¿€", "0. µπæ∆∞°±‚" },
+        Logs,
+        "¿€æ˜¿ª º±≈√«œººø‰."
+    );
+    return ReadChoice(0, 1);
 }
 
 void UIManager::PrintInsufficientIngredients() const
 {
-	ClearConsole();
-	std::cout << border << '\n';
-	std::cout << "Ïû¨Î£åÍ∞Ä Î∂ÄÏ°±Ìï©ÎãàÎã§." << '\n';
-	std::cout << "Î†àÏãúÌîº ÏÑ†ÌÉù ÌôîÎ©¥ÏúºÎ°ú ÎèåÏïÑÍ∞ëÎãàÎã§." << '\n';
-	std::cout << border << '\n';
-	WaitOutputDelay(500, 2);
+    RenderLayout(
+        "COOKING",
+        LoadUiArtAsset("UI/Cook.txt"),
+        { "0. ∑πΩ√««∑Œ µπæ∆∞°±‚" },
+        { "¿Á∑·∞° ∫Œ¡∑«’¥œ¥Ÿ.", "∑πΩ√«« º±≈√ »≠∏È¿∏∑Œ µπæ∆∞©¥œ¥Ÿ." },
+        "∞Ëº”«œ∑¡∏È Enter∏¶ ¥©∏£ººø‰."
+    );
+    WaitForContinue();
 }
 
 void UIManager::PrintRecipeSuccess(
-	const std::string& RecipeName,
-	int HpBonus,
-	int AttackBonus,
-	int DefenseBonus,
-	const Player& player,
-	bool IsNextStageUnlocked
+    const std::string& RecipeName,
+    int HpBonus,
+    int AttackBonus,
+    int DefenseBonus,
+    const Player& player,
+    bool IsNextStageUnlocked
 ) const
 {
-	ClearConsole();
-	std::cout << border << '\n';
-	std::cout << "ÏöîÎ¶¨ ÏÑ±Í≥µ!" << '\n';
-	std::cout << RecipeName << "ÏùÑ(Î•º) Ï¶âÏãú ÏÑ≠Ï∑®ÌñàÏäµÎãàÎã§." << '\n';
-	std::cout << border << '\n';
-	std::cout << "ÏµúÎåÄ HP +" << HpBonus
-		<< " (" << player.GetMaxHp() << ")" << '\n';
-	std::cout << "Í≥µÍ≤©Î†• +" << AttackBonus
-		<< " (" << player.GetPower() << ")" << '\n';
-	std::cout << "Î∞©Ïñ¥Î†• +" << DefenseBonus
-		<< " (" << player.GetDefence() << ")" << '\n';
+    std::vector<std::string> Logs = {
+        "ø‰∏Æ º∫∞¯! " + RecipeName + "¿ª(∏¶) ¡ÔΩ√ º∑√Î«ﬂΩ¿¥œ¥Ÿ.",
+        "√÷¥Î HP +" + std::to_string(HpBonus) + " (" + std::to_string(player.GetMaxHp()) + ")",
+        "∞¯∞›∑¬ +" + std::to_string(AttackBonus) + " (" + std::to_string(player.GetPower()) + ")",
+        "πÊæÓ∑¬ +" + std::to_string(DefenseBonus) + " (" + std::to_string(player.GetDefence()) + ")"
+    };
+    if (IsNextStageUnlocked)
+    {
+        Logs.push_back("¥Ÿ¿Ω Ω∫≈◊¿Ã¡ˆ∞° ø≠∑»Ω¿¥œ¥Ÿ!");
+    }
 
-	if (IsNextStageUnlocked)
-	{
-		std::cout << border << '\n';
-		std::cout << "Îã§Ïùå Ïä§ÌÖåÏù¥ÏßÄÍ∞Ä Ïó¥Î†∏ÏäµÎãàÎã§!" << '\n';
-	}
-
-	std::cout << border << '\n';
-	WaitOutputDelay(500, 3);
+    RenderLayout(
+        "COOKING COMPLETE",
+        LoadUiArtAsset("UI/Cook.txt"),
+        {},
+        Logs,
+        "∞Ëº”«œ∑¡∏È Enter∏¶ ¥©∏£ººø‰."
+    );
+    WaitForContinue();
 }
 
 int UIManager::PrintShop(const std::vector<ShopItem>& shopItems)
 {
-	int menuMin = 0;
-	int menuMax;
-	ScreenData screen;
-	std::string temp;
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("ÏÉÅÏ†ê", LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	for (size_t i = 0; i < shopItems.size(); ++i)
-	{
-		temp = std::to_string(i + 1) + ". " + Item::GetNameById(shopItems[i].id) +
-			" : " + std::to_string(shopItems[i].price) + "Í≥®Îìú";
-		screen.AddLine(temp, LineType::out);
-	}
-	screen.AddLine("0 : exit", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-	menuMax = static_cast<int>(shopItems.size());
+    std::vector<std::string> Options;
+    for (std::size_t Index = 0; Index < shopItems.size(); ++Index)
+    {
+        Options.push_back(
+            std::to_string(Index + 1) + ". " + Item::GetNameById(shopItems[Index].id) +
+            " / " + std::to_string(shopItems[Index].price) + " Gold"
+        );
+    }
+    Options.push_back("0. µπæ∆∞°±‚");
 
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-
-	if (!screen.GetHasInput())
-	{
-		return -1;
-	}
-
-	const int choice = GetInput(screen, menuMin, menuMax);
-	if (choice == 0)
-	{
-		return 0;
-	}
-
-	const ShopItem& SelectedItem = shopItems[choice - 1];
-	if (PrintSelectedShopItem(SelectedItem) != 1)
-	{
-		return 0;
-	}
-
-	return SelectedItem.id;
+    RenderLayout(
+        "SHOP",
+        LoadUiArtAsset("UI/Shop.txt"),
+        Options,
+        { "±∏∏≈«“ æ∆¿Ã≈€¿ª º±≈√«œººø‰." },
+        "ªÛ«∞ π¯»£∏¶ ¿‘∑¬«œººø‰."
+    );
+    const int Choice = ReadChoice(0, static_cast<int>(shopItems.size()));
+    if (Choice == 0 || PrintSelectedShopItem(shopItems[Choice - 1]) != 1)
+    {
+        return 0;
+    }
+    return shopItems[Choice - 1].id;
 }
 
 int UIManager::PrintSelectedShopItem(const ShopItem& shopItem)
 {
-	ScreenData screen;
-	int menuMin = 0;
-	int menuMax = 1;
-	std::string temp;
-	
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("ÏÉÅÏ†ê", LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	temp = Item::GetNameById(shopItem.id) + "\nÍ∞ÄÍ≤©: " + std::to_string(shopItem.price);
-	screen.AddLine(temp, LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine("1: Íµ¨Îß§", LineType::out);
-	screen.AddLine("0 : exit", LineType::out);
-	screen.AddLine(emptyLine, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-
-	return GetInput(screen, menuMin, menuMax);
+    RenderLayout(
+        "SHOP ITEM",
+        LoadUiArtAsset("UI/Shop.txt"),
+        { "1. ±∏∏≈", "0. µπæ∆∞°±‚" },
+        {
+            "ªÛ«∞: " + Item::GetNameById(shopItem.id),
+            "∞°∞›: " + std::to_string(shopItem.price) + " Gold"
+        },
+        "¿€æ˜¿ª º±≈√«œººø‰."
+    );
+    return ReadChoice(0, 1);
 }
 
-void UIManager::PrintShopPurchaseResult(
-	bool IsPurchased,
-	const Player& player
-) const
+void UIManager::PrintShopPurchaseResult(bool IsPurchased, const Player& player) const
 {
-	ClearConsole();
-	std::cout << border << '\n';
-	std::cout << (IsPurchased
-		? "Íµ¨Îß§Í∞Ä ÏôÑÎ£åÎêòÏóàÏäµÎãàÎã§."
-		: "Íµ¨Îß§Ìï† Ïàò ÏóÜÏäµÎãàÎã§. Í≥®ÎìúÎ•º ÌôïÏù∏Ìï¥Ï£ºÏÑ∏Ïöî.") << '\n';
-	std::cout << "ÌòÑÏû¨ Í≥®Îìú: " << player.GetGold() << '\n';
-	std::cout << border << '\n';
-	WaitOutputDelay(500, 2);
+    RenderLayout(
+        "SHOP RESULT",
+        LoadUiArtAsset("UI/Shop.txt"),
+        {},
+        {
+            IsPurchased ? "±∏∏≈∞° øœ∑·µ«æ˙Ω¿¥œ¥Ÿ." : "±∏∏≈«“ ºˆ æ¯Ω¿¥œ¥Ÿ. ∞ÒµÂ∏¶ »Æ¿Œ«ÿ¡÷ººø‰.",
+            "«ˆ¿Á ∞ÒµÂ: " + std::to_string(player.GetGold())
+        },
+        "∞Ëº”«œ∑¡∏È Enter∏¶ ¥©∏£ººø‰."
+    );
+    WaitForContinue();
 }
 
-int UIManager::PrintSkillSelection(
-	const Player& player,
-	const Monster& monster
-) const
+int UIManager::PrintSkillSelection(const Player& player, const Monster& monster) const
 {
-	const std::vector<Skill>& Skills = player.GetSkills();
-	ScreenData screen;
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("[" + monster.GetName() + "] Ï†ÑÌà¨ Ïä§ÌÇ¨ ÏÑ†ÌÉù", LineType::out);
-	screen.AddLine(
-		"ÌòÑÏû¨ MP: " + std::to_string(player.GetCurrentMp()) +
-		" / " + std::to_string(player.GetMaxMp()),
-		LineType::out
-	);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("0: Ïä§ÌÇ¨ÏùÑ ÏÇ¨Ïö©ÌïòÏßÄ ÏïäÏùå", LineType::out);
+    const std::vector<Skill>& Skills = player.GetSkills();
+    std::vector<std::string> Options = { "0. Ω∫≈≥ ªÁøÎ æ» «‘" };
+    for (std::size_t Index = 0; Index < Skills.size(); ++Index)
+    {
+        const Skill& CurrentSkill = Skills[Index];
+        Options.push_back(std::to_string(Index + 1) + ". " + CurrentSkill.GetName());
+    }
 
-	for (std::size_t Index = 0; Index < Skills.size(); ++Index)
-	{
-		const Skill& CurrentSkill = Skills[Index];
-		std::string TriggerText;
+    std::vector<std::string> Logs = {
+        "ªÛ¥Î: " + monster.GetName(),
+        "MP: " + std::to_string(player.GetCurrentMp()) + "/" + std::to_string(player.GetMaxMp())
+    };
+    for (const Skill& CurrentSkill : Skills)
+    {
+        Logs.push_back(
+            CurrentSkill.GetName() + " / «««ÿ " + std::to_string(CurrentSkill.GetDamage()) +
+            " / MP " + std::to_string(CurrentSkill.GetManaCost()) +
+            " / " + GetSkillTriggerText(CurrentSkill)
+        );
+    }
 
-		switch (CurrentSkill.GetTriggerType())
-		{
-		case SkillTriggerType::EveryNthTurn:
-			TriggerText = std::to_string(CurrentSkill.GetTriggerValue()) +
-				"ÌÑ¥ÎßàÎã§ ÏûêÎèô ÏÇ¨Ïö©";
-			break;
-		case SkillTriggerType::PlayerHpBelow:
-			TriggerText = "HP " +
-				std::to_string(CurrentSkill.GetTriggerValue()) +
-				"% Ïù¥ÌïòÏóêÏÑú ÏûêÎèô ÏÇ¨Ïö©";
-			break;
-		default:
-			TriggerText = "ÏûêÎèô ÏÇ¨Ïö©";
-			break;
-		}
-
-		screen.AddLine(
-			std::to_string(Index + 1) + ": " + CurrentSkill.GetName() +
-			" / Îç∞ÎØ∏ÏßÄ " + std::to_string(CurrentSkill.GetDamage()) +
-			" / MP " + std::to_string(CurrentSkill.GetManaCost()) +
-			" / " + TriggerText,
-			LineType::out
-		);
-	}
-
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
-
-	ClearConsole();
-	for (int Index = 0; Index < screen.GetDataSize(); ++Index)
-	{
-		screen.PrintLine(Index);
-	}
-
-	const int Selection = GetInput(
-		screen,
-		0,
-		static_cast<int>(Skills.size())
-	);
-	if (Selection == 0)
-	{
-		return 0;
-	}
-
-	return Skills[Selection - 1].GetId();
+    RenderLayout(
+        "SKILL SELECT",
+        LoadUiArtAsset("UI/Skill.txt"),
+        Options,
+        Logs,
+        "ªÁøÎ«“ Ω∫≈≥¿ª º±≈√«œººø‰."
+    );
+    const int Selection = ReadChoice(0, static_cast<int>(Skills.size()));
+    return Selection == 0 ? 0 : Skills[Selection - 1].GetId();
 }
 
 void UIManager::PrintBossIntroStory(const Monster& boss) const
 {
-	ClearConsole();
-	std::cout << border << '\n';
-	std::cout << "Í∂ÅÍ∑πÏùò ÌñÑÎ≤ÑÍ±∞Í∞Ä ÏôÑÏÑ±ÎêòÏûê, Ï£ºÎ≥ÄÏùò Í≥µÍ∏∞Í∞Ä Î¨¥Í≤ÅÍ≤å Í∞ÄÎùºÏïâÎäîÎã§." << '\n';
-	Sleep(1200);
-	std::cout << "Ïñ¥Îë† ÏÜçÏóêÏÑú Í±∞ÎåÄÌïú Í∑∏Î¶ºÏûêÍ∞Ä Ï≤úÏ≤úÌûà Îã§Í∞ÄÏò®Îã§..." << '\n';
-	Sleep(1200);
-	std::cout << border << '\n';
-	std::cout << boss.GetName()
-		<< ": \"Ïö©ÏºÄÎèÑ ÌñÑÎ≤ÑÍ±∞Î•º ÏôÑÏÑ±ÌñàÍµ∞, ÏùºÍ∞ú ÏöîÎ¶¨ÏÇ¨Ïó¨...\"" << '\n';
-	Sleep(1500);
-	std::cout << boss.GetName()
-		<< ": \"ÌïòÏßÄÎßå Í∑∏ ÌñÑÎ≤ÑÍ±∞Îäî ÏïÑÏßÅ ÏôÑÏ†ÑÌïòÏßÄ ÏïäÎã§.\"" << '\n';
-	Sleep(1500);
-	std::cout << boss.GetName()
-		<< ": \"ÎÇòÎ•º ÎÑòÏñ¥ÏÑúÏïº ÎπÑÎ°úÏÜå ÎßàÏßÄÎßâ Ìïú Ï°∞Í∞ÅÏùÑ ÏñªÏùÑ Ïàò ÏûàÏùÑ Í≤ÉÏù¥Îã§!\"" << '\n';
-	Sleep(1500);
-	std::cout << border << '\n';
-	std::cout << "ÏµúÏ¢Ö Î≥¥Ïä§, " << boss.GetName() << "Í∞Ä ÎÇòÌÉÄÎÇ¨Îã§!" << '\n';
-	std::cout << border << '\n';
-	Sleep(1500);
+    RenderLayout(
+        "BOSS",
+        {},
+        {},
+        {
+            "±√±ÿ¿« «‹πˆ∞≈∞° øœº∫µ«¿⁄ ¡÷∫Ø¿« ∞¯±‚∞° π´∞Ã∞‘ ∞°∂Ûæ…¥¬¥Ÿ.",
+            "æÓµ“ º”ø°º≠ ∞≈¥Î«— ±◊∏≤¿⁄∞° √µ√µ»˜ ¥Ÿ∞°ø¬¥Ÿ...",
+            boss.GetName() + ": \"øÎƒ…µµ «‹πˆ∞≈∏¶ øœº∫«ﬂ±∫, ¿œ∞≥ ø‰∏ÆªÁø©...\"",
+            boss.GetName() + ": \"≥™∏¶ ≥—æÓæﬂ ∏∂¡ˆ∏∑ «— ¡∂∞¢¿ª æÚ¿ª ºˆ ¿÷¥Ÿ!\"",
+            "√÷¡æ ∫∏Ω∫, " + boss.GetName() + "∞° ≥™≈∏≥µ¥Ÿ!"
+        },
+        "∞Ëº”«œ∑¡∏È Enter∏¶ ¥©∏£ººø‰."
+    );
+    WaitForContinue();
 }
 
 void UIManager::PrintEndingStory() const
 {
-	ClearConsole();
-	std::cout << border << '\n';
-	std::cout << "Í∞êÏûê ÎåÄÏôïÏù¥ ÎÇ®Í∏¥ Í∞êÏûêÎ°ú ÎßàÏπ®ÎÇ¥ ÏµúÏ¢ÖÏùò Í∞êÏûêÌäÄÍπÄÏùÑ ÏôÑÏÑ±ÌñàÎã§." << '\n';
-	Sleep(1400);
-	std::cout << "Î∞îÏÇ≠Ìïú Í∞êÏûêÌäÄÍπÄÏùÑ Ìïú ÏûÖ Î≤†Ïñ¥ Î¨ºÏóàÎã§." << '\n';
-	Sleep(1400);
-	std::cout << "..." << '\n';
-	Sleep(1200);
-	std::cout << "\"Î¨¥Ïñ∏Í∞Ä Î∂ÄÏ°±ÌïòÎã§...\"" << '\n';
-	Sleep(1600);
-	std::cout << "Îã§Ïãú Ìïú ÏûÖÏùÑ Î®πÏóàÏßÄÎßå, ÌóàÏ†ÑÌï®ÏùÄ ÏÇ¨ÎùºÏßÄÏßÄ ÏïäÏïòÎã§." << '\n';
-	Sleep(1400);
-	std::cout << "\"Î™©Ïù¥ ÎßàÎ•¥Îã§...\"" << '\n';
-	Sleep(1800);
-	std::cout << border << '\n';
-	std::cout << "Î©ÄÎ¶¨ÏÑú ÌÜ° ÏèòÎäî Í∏∞Ìè¨ ÏÜåÎ¶¨Í∞Ä Îì§Î†§Ïò®Îã§..." << '\n';
-	Sleep(1800);
-	std::cout << '\n' << "To be continued..." << '\n';
-	std::cout << border << '\n';
-	Sleep(2000);
-}
+    const std::vector<std::string> StoryLines = {
+        "∞®¿⁄ ¥Îø’¿Ã ≥≤±‰ ∞®¿⁄∑Œ √÷¡æ¿« ∞®¿⁄∆¢±Ë¿ª øœº∫«ﬂ¥Ÿ.",
+        "πŸªË«— ∞®¿⁄∆¢±Ë¿ª «— ¿‘ ∫£æÓ π∞æ˙¥Ÿ.",
+        "...",
+        "\"π´æ∞° ∫Œ¡∑«œ¥Ÿ...\"",
+        "¥ŸΩ√ «— ¿‘¿ª ∏‘æ˙¡ˆ∏∏, «„¿¸«‘¿∫ ªÁ∂Û¡ˆ¡ˆ æ æ“¥Ÿ.",
+        "\"∏Ò¿Ã ∏∂∏£¥Ÿ...\"",
+        "∏÷∏Æº≠ ≈Â ΩÓ¥¬ ±‚∆˜ º“∏Æ∞° µÈ∑¡ø¬¥Ÿ...",
+        "To be continued..."
+    };
+    constexpr DWORD StoryDelays[] = {
+        1400,
+        1400,
+        1200,
+        1600,
+        1400,
+        1800,
+        1800,
+        0
+    };
 
-void SetBattleLog(const BattleInfo& currentLog, ScreenData& data, std::string border, std::string emptyLine)
-{
-	std::string playerTurn;
-	std::string monsterTurn;
-	std::string resultText;
-	std::string temp;
+    RenderLayout(
+        "ENDING",
+        {},
+        {},
+        {},
+        "¿Ãæﬂ±‚∞° ≥°≥Ø ∂ß±Ó¡ˆ ±‚¥Ÿ∑¡¡÷ººø‰."
+    );
 
-	playerTurn = "ÌîåÎ†àÏù¥Ïñ¥Ïùò Í≥µÍ≤©!\n" + currentLog.MonsterName +"ÏóêÍ≤å "
-		+ std::to_string(currentLog.PlayerAttackDamage) + "Ïùò Îç∞ÎØ∏ÏßÄ!";
-	monsterTurn = currentLog.MonsterName + "Ïùò Í≥µÍ≤©!\nÌîåÎ†àÏù¥Ïñ¥ÏóêÍ≤å "
-		+ std::to_string(currentLog.MonsterAttackDamage) + "Ïùò Îç∞ÎØ∏ÏßÄ!";
-	resultText = "ÎÇ®ÏùÄ Ï≤¥Î†•\nÌîåÎ†àÏù¥Ïñ¥: " + std::to_string(currentLog.PlayerRemainingHP)
-		+ " / Î™¨Ïä§ÌÑ∞: " + std::to_string(currentLog.MonsterRemainingHP);
+    for (std::size_t Index = 0; Index < StoryLines.size(); ++Index)
+    {
+        WriteAt(2, TopHeight + 2 + static_cast<int>(Index), StoryLines[Index]);
+        Sleep(StoryDelays[Index]);
+    }
 
-	temp = ">" + std::to_string(currentLog.Turn) + "Î≤àÏß∏ ÌÑ¥!";
-	data.AddLine(temp, LineType::out);
-	data.AddLine(playerTurn, LineType::out);
-	data.AddLine(monsterTurn, LineType::out);
-	data.AddLine(emptyLine, LineType::out);
-	data.AddLine(resultText, LineType::out);
-	data.AddLine(emptyLine, LineType::wait);
+    WaitForContinue();
 }
 
 int UIManager::PrintBattleLog(
-	const std::pair<BattleResult, std::vector<BattleInfo>>& Result
+    const std::pair<BattleResult, std::vector<BattleInfo>>& Result
 ) const
 {
-	const std::vector<BattleInfo>& BattleLogs = Result.second;
-	ScreenData screen;
-	int menuMin = 0;
-	int menuMax = 0;
+    const std::vector<BattleInfo>& BattleLogs = Result.second;
+    std::string MonsterName = "MONSTER";
+    std::vector<std::string> ArtLines;
+    if (!BattleLogs.empty())
+    {
+        MonsterName = BattleLogs.front().MonsterName;
+        ArtLines = LoadArtAsset(
+            Monster::GetAsciiArtAssetNameById(BattleLogs.front().MonsterId)
+        );
+    }
 
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("ÏÑ∏Í≥Ñ ÏµúÍ≥†Ïùò ÌñÑÎ≤ÑÍ±∞Î•º ÎßåÎì§Í∏∞ ÏúÑÌïòÏó¨.", LineType::out);
-	screen.AddLine(border, LineType::out);
-	if (!BattleLogs.empty())
-	{
-		const BattleInfo& FirstLog = BattleLogs.front();
-		screen.AddLine("[" + FirstLog.MonsterName + "]", LineType::out);
-		screen.AddLine(
-			Monster::GetAsciiArtById(FirstLog.MonsterId),
-			LineType::out
-		);
-		screen.AddLine(border, LineType::out);
-	}
-	screen.AddLine(emptyLine, LineType::ceiling);
+    for (const BattleInfo& Log : BattleLogs)
+    {
+        RenderLayout(
+            "BATTLE - " + MonsterName,
+            ArtLines,
+            { "¿⁄µø ¿¸≈ı ¡¯«‡ ¡ﬂ" },
+            {
+                std::to_string(Log.Turn) + "π¯¬∞ ≈œ",
+                "«√∑π¿ÃæÓ ∞¯∞›: " + std::to_string(Log.PlayerAttackDamage) + " «««ÿ"
+            },
+            "∏ÛΩ∫≈Õ∏¶ ∞¯∞›«ﬂΩ¿¥œ¥Ÿ."
+        );
+        AnimateMonsterHit(ArtLines);
 
-	for (std::size_t Index = 0; Index < BattleLogs.size(); ++Index)
-	{
-		SetBattleLog(BattleLogs[Index], screen, border, emptyLine);
-	}
+        RenderLayout(
+            "BATTLE - " + MonsterName,
+            ArtLines,
+            { "¿⁄µø ¿¸≈ı ¡¯«‡ ¡ﬂ" },
+            {
+                std::to_string(Log.Turn) + "π¯¬∞ ≈œ",
+                "«√∑π¿ÃæÓ ∞¯∞›: " + std::to_string(Log.PlayerAttackDamage) + " «««ÿ",
+                MonsterName + " ∞¯∞›: " + std::to_string(Log.MonsterAttackDamage) + " «««ÿ",
+                "«√∑π¿ÃæÓ HP: " + std::to_string(Log.PlayerRemainingHP),
+                MonsterName + " HP: " + std::to_string(Log.MonsterRemainingHP)
+            },
+            "¿¸≈ı∞° ¿⁄µø¿∏∑Œ ¡¯«‡µÀ¥œ¥Ÿ."
+        );
+        Sleep(650);
+    }
 
-	screen.AddLine(border, LineType::out);
-	std::string resultText =
-		(Result.first == BattleResult::Win) ?
-		"Ïã∏Ïõ†ÎçîÎãà Î∞∞Í∞Ä Í≥†ÌîÑÎã§. ÎßõÏûàÎäî Í±∞ Î®πÏúºÎü¨ Í∞ÄÏûê." : "ÎÇòÎäî ÏïÑÏßÅ ÎÑ§ÎÖÄÏÑùÏùÑ ÏöîÎ¶¨Ìï† ÏûêÍ≤©Ïù¥ ÏóÜÎÇòÎ≥¥Íµ∞...";
-	screen.AddLine(resultText, LineType::out);
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Enter : ", LineType::in);
+    const bool IsVictory = Result.first == BattleResult::Win;
+    if (IsVictory)
+    {
+        AnimateMonsterDefeat(ArtLines);
+    }
 
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-		if (screen.CheckIsWait(i))
-		{
-			WaitOutputDelay(1000, 3);
-			screen.ResetToCeiling();
-		}
-	}
-
-	if (!screen.GetHasInput())
-	{
-		return -1;
-	}
-
-	return GetInput(screen, menuMin, menuMax);
+    RenderLayout(
+        "BATTLE RESULT",
+        IsVictory ? std::vector<std::string>() : ArtLines,
+        { "0. ∞Ëº”" },
+        {
+            Result.first == BattleResult::Win
+                ? "Ω¬∏Æ«ﬂΩ¿¥œ¥Ÿ. ∏¿¿÷¥¬ ¿Á∑·∏¶ √£¿∏∑Ø ∞©¥œ¥Ÿ."
+                : "∆–πË«ﬂΩ¿¥œ¥Ÿ. æ∆¡˜ ø‰∏Æ«“ ¿⁄∞›¿Ã ∫Œ¡∑«’¥œ¥Ÿ."
+        },
+        "0¿ª ¿‘∑¬«œººø‰."
+    );
+    return ReadChoice(0, 0);
 }
 
 int UIManager::PrintBattleResult(const Player& player, const Monster& monster) const
 {
-	ScreenData screen;
-	int menuMin = 0;
-	int menuMax = 0;
-	std::string temp;
+    std::vector<std::string> Logs = {
+        "¿Á∑·∏¶ º’ø° ≥÷æ˙Ω¿¥œ¥Ÿ.",
+        "»πµÊ ∞ÒµÂ: " + std::to_string(monster.GetDropGold()),
+        "√— ∞ÒµÂ: " + std::to_string(player.GetGold())
+    };
 
-	screen.AddLine(border, LineType::out);
-	screen.AddLine("Ïû¨Î£åÎ•º ÏÜêÏóê ÎÑ£ÏóàÎã§.", LineType::out);
-	screen.AddLine(border, LineType::out);
-	
-	temp = "ÌöçÎìùÌïú Í≥®Îìú: " + std::to_string(monster.GetDropGold());
-	screen.AddLine(temp, LineType::out);
+    const int IngredientId = monster.GetDropIngredientId();
+    const InventorySlot* RewardSlot = player.GetInventory().FindSlot(IngredientId);
+    if (RewardSlot != nullptr && RewardSlot->ItemPtr != nullptr)
+    {
+        Logs.push_back(
+            "»πµÊ: " + RewardSlot->ItemPtr->GetName() + " " +
+            std::to_string(monster.GetDropIngredientAmount()) + "∞≥"
+        );
+        Logs.push_back(
+            "√— ∫∏¿Ø: " + RewardSlot->ItemPtr->GetName() + " " +
+            std::to_string(RewardSlot->Count) + "∞≥"
+        );
+    }
 
-	const int IngredientId = monster.GetDropIngredientId();
-	const int IngredientAmount = monster.GetDropIngredientAmount();
-	const InventorySlot* RewardSlot =
-		player.GetInventory().FindSlot(IngredientId);
-
-	if (RewardSlot != nullptr && RewardSlot->ItemPtr != nullptr)
-	{
-		temp = "ÌöçÎìùÌïú " + RewardSlot->ItemPtr->GetName() + ": " + std::to_string(IngredientAmount) + "Í∞ú";
-		screen.AddLine(temp, LineType::out);
-		temp = "Ï¥ù " + RewardSlot->ItemPtr->GetName() + ": " + std::to_string(RewardSlot->Count) + "Í∞ú";
-		screen.AddLine(temp, LineType::out);
-	}
-
-	std::cout << "Total Gold: "
-		<< player.GetGold() << "\n\n";
-	temp = "Ï¥ù Í≥®Îìú: " + std::to_string(player.GetGold());
-	screen.AddLine(temp, LineType::out);
-	screen.AddLine(border, LineType::out);
-
-	ClearConsole();
-	for (int i = 0; i < screen.GetDataSize(); ++i)
-	{
-		screen.PrintLine(i);
-	}
-
-	if (!screen.GetHasInput())
-	{
-		WaitOutputDelay(500, 4);
-		return -1;
-	}
-
-	return GetInput(screen, menuMin, menuMax);
+    RenderLayout("BATTLE REWARD", {}, {}, Logs, "∞Ëº”«œ∑¡∏È Enter∏¶ ¥©∏£ººø‰.");
+    WaitForContinue();
+    return 0;
 }
