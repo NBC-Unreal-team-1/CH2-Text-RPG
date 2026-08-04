@@ -17,7 +17,8 @@ public:
     ~BattleManager();
     std::pair<BattleResult, std::vector<BattleInfo>> StartBattle(
         Player& player,
-        Monster& monster, Skill* selectedSkill = nullptr
+        Monster& monster,
+        const Skill* selectedSkill = nullptr
     );
   
 

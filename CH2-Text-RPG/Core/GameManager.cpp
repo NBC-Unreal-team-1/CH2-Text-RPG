@@ -62,8 +62,12 @@ void GameManager::RunTutorial()
                   << CurrentMonster.GetCurrentHp() << '/'
                   << CurrentMonster.GetMaxHp() << "\n\n";
 
-        const auto BattleResultData =
-            Battle.StartBattle(PlayerCharacter, CurrentMonster);
+        const Skill* SelectedSkill = SelectBattleSkill(CurrentMonster);
+        const auto BattleResultData = Battle.StartBattle(
+            PlayerCharacter,
+            CurrentMonster,
+            SelectedSkill
+        );
 
         UI.PrintBattleLog(BattleResultData);
 
@@ -155,16 +159,14 @@ void GameManager::GameLoop()
         case 3:
             HandleRecipeMenu();
             break;
+        case 4:
+            HandleShopMenu();
+            break;
         default:
             break;
         }
     }
 
-    if (Recipe.IsFinalRecipeCompleted())
-    {
-        std::cout << "\n=== Game Clear ===\n";
-        std::cout << "최종의 감자튀김을 획득했습니다!\n";
-    }
 }
 
 void GameManager::RunNextIngredientBattle()
@@ -183,7 +185,12 @@ void GameManager::RunNextIngredientBattle()
     }
 
     Monster CurrentMonster(static_cast<MonsterType>(MissingIngredientId - 100));
-    const auto BattleResultData = Battle.StartBattle(PlayerCharacter, CurrentMonster);
+    const Skill* SelectedSkill = SelectBattleSkill(CurrentMonster);
+    const auto BattleResultData = Battle.StartBattle(
+        PlayerCharacter,
+        CurrentMonster,
+        SelectedSkill
+    );
     UI.PrintBattleLog(BattleResultData);
 
     if (BattleResultData.first == BattleResult::Win)
@@ -199,9 +206,14 @@ void GameManager::RunNextIngredientBattle()
 void GameManager::RunBossBattle()
 {
     Monster Boss(MonsterType::PotatoBoss);
-    std::cout << "\n궁극의 햄버거 완성! 감자 대왕과의 보스전이 시작됩니다.\n";
+    UI.PrintBossIntroStory(Boss);
 
-    const auto BattleResultData = Battle.StartBattle(PlayerCharacter, Boss);
+    const Skill* SelectedSkill = SelectBattleSkill(Boss);
+    const auto BattleResultData = Battle.StartBattle(
+        PlayerCharacter,
+        Boss,
+        SelectedSkill
+    );
     UI.PrintBattleLog(BattleResultData);
 
     if (BattleResultData.first != BattleResult::Win)
@@ -214,25 +226,65 @@ void GameManager::RunBossBattle()
 
     ApplyBattleReward(Boss);
     PrintBattleReward(Boss);
-    CookRecipe(12);
+    if (CookRecipe(12))
+    {
+        UI.PrintEndingStory();
+    }
 }
 
 void GameManager::HandleRecipeMenu()
 {
-    const std::vector<const ::Recipe*> AvailableRecipes = Recipe.GetAllRecipes();
-    const int RecipeSelection = UI.PrintRecipes(Recipe, PlayerCharacter.GetInventory());
+    while (true)
+    {
+        const std::vector<const ::Recipe*> AvailableRecipes =
+            Recipe.GetAllRecipes();
+        const int RecipeSelection =
+            UI.PrintRecipes(Recipe, PlayerCharacter.GetInventory());
 
-    if (RecipeSelection <= 0 ||
-        RecipeSelection > static_cast<int>(AvailableRecipes.size()))
+        if (RecipeSelection <= 0 ||
+            RecipeSelection > static_cast<int>(AvailableRecipes.size()))
+        {
+            return;
+        }
+
+        const int SelectedRecipeId =
+            AvailableRecipes[RecipeSelection - 1]->Id;
+        if (!CookRecipe(SelectedRecipeId))
+        {
+            continue;
+        }
+
+        if (SelectedRecipeId == 11)
+        {
+            RunBossBattle();
+        }
+        return;
+    }
+}
+
+void GameManager::HandleShopMenu()
+{
+    const int SelectedItemId = UI.PrintShop(Shop.GetShopItems());
+    if (SelectedItemId <= 0)
     {
         return;
     }
 
-    const int SelectedRecipeId = AvailableRecipes[RecipeSelection - 1]->Id;
-    if (CookRecipe(SelectedRecipeId) && SelectedRecipeId == 11)
+    const bool IsPurchased =
+        Shop.PurchaseItem(PlayerCharacter, SelectedItemId);
+    UI.PrintShopPurchaseResult(IsPurchased, PlayerCharacter);
+}
+
+const Skill* GameManager::SelectBattleSkill(const Monster& monster)
+{
+    const int SelectedSkillId =
+        UI.PrintSkillSelection(PlayerCharacter, monster);
+    if (SelectedSkillId <= 0)
     {
-        RunBossBattle();
+        return nullptr;
     }
+
+    return PlayerCharacter.GetSkillById(SelectedSkillId);
 }
 
 bool GameManager::CookRecipe(int RecipeId)
@@ -254,7 +306,7 @@ bool GameManager::CookRecipe(int RecipeId)
 
     if (!Recipe.CanCompleteRecipe(RecipeId, OwnedIngredients))
     {
-        std::cout << "재료가 부족하거나 아직 잠긴 레시피입니다.\n";
+        UI.PrintInsufficientIngredients();
         return false;
     }
 
@@ -276,7 +328,14 @@ bool GameManager::CookRecipe(int RecipeId)
     }
 
     PlayerCharacter.ApplyFoodBonus(HpBonus, AttackBonus, DefenseBonus);
-    std::cout << RecipeName << " 제작 및 섭취 완료!\n";
+    UI.PrintRecipeSuccess(
+        RecipeName,
+        HpBonus,
+        AttackBonus,
+        DefenseBonus,
+        PlayerCharacter,
+        RecipeId != 12
+    );
     return true;
 }
 
