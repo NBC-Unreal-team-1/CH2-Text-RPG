@@ -25,7 +25,8 @@ void BattleManager::ClearBattleInfos()
 
 std::pair<BattleResult, std::vector<BattleInfo>> BattleManager::StartBattle(
     Player& player,
-    Monster& monster,Skill* selectedSkill
+    Monster& monster,
+    const Skill* selectedSkill
 )
 {
     ClearBattleInfos();

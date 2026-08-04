@@ -27,7 +27,9 @@ protected:
     void RunNextIngredientBattle();
     void RunBossBattle();
     void HandleRecipeMenu();
+    void HandleShopMenu();
     bool CookRecipe(int RecipeId);
+    const Skill* SelectBattleSkill(const Monster& monster);
 
     Monster CreateRandomTutorialMonster();
     const ::Recipe* FindNextRecipe() const;

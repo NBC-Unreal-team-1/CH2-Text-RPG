@@ -24,6 +24,7 @@ public:
     );
     Inventory& GetInventory();
     const Inventory& GetInventory() const;
+    const std::vector<Skill>& GetSkills() const;
     const Skill* GetSkillById(int Id) const;
 
 	// Gold를 소비하는 함수

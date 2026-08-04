@@ -80,6 +80,11 @@ const Inventory& Player::GetInventory() const
     return PlayerInventory;
 }
 
+const std::vector<Skill>& Player::GetSkills() const
+{
+    return Skills;
+}
+
 const Skill* Player::GetSkillById(int Id) const
 {
     for (const Skill& CurrentSkill : Skills)
