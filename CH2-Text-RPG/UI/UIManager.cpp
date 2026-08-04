@@ -173,26 +173,108 @@ namespace
         return Result;
     }
 
+    std::string WideToUtf8(const std::wstring& Text)
+    {
+        if (Text.empty())
+        {
+            return {};
+        }
+
+        const int Length = WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            Text.data(),
+            static_cast<int>(Text.size()),
+            nullptr,
+            0,
+            nullptr,
+            nullptr
+        );
+        std::string Result(Length, '\0');
+        WideCharToMultiByte(
+            CP_UTF8,
+            0,
+            Text.data(),
+            static_cast<int>(Text.size()),
+            Result.data(),
+            Length,
+            nullptr,
+            nullptr
+        );
+        return Result;
+    }
+
     void WriteArtBlock(
         int X,
         int Y,
         int MaxRows,
-        const std::vector<std::string>& Lines
+        const std::vector<std::string>& Lines,
+        int HorizontalOffset = 0
     )
     {
         const int RowCount = (std::min)(MaxRows, static_cast<int>(Lines.size()));
+        const int ArtAreaWidth = LeftWidth - X;
+        const int StartY = Y + (MaxRows - RowCount) / 2;
+        int ArtWidth = 0;
         for (int Row = 0; Row < RowCount; ++Row)
         {
-            WriteWideAt(X, Y + Row, Utf8ToWide(Lines[Row]));
+            ArtWidth = (std::max)(
+                ArtWidth,
+                static_cast<int>(Utf8ToWide(Lines[Row]).size())
+            );
+        }
+        const int StartX = X + (std::max)(0, (ArtAreaWidth - ArtWidth) / 2) +
+            HorizontalOffset;
+
+        for (int Row = 0; Row < RowCount; ++Row)
+        {
+            const std::wstring WideLine = Utf8ToWide(Lines[Row]);
+            WriteWideAt(StartX, StartY + Row, WideLine);
         }
     }
 
-    std::vector<std::string> LoadTitleArt()
+    void ClearArtBlock()
+    {
+        const std::wstring EmptyLine(LeftWidth - 2, L' ');
+        for (int Row = 0; Row < TopHeight - 3; ++Row)
+        {
+            WriteWideAt(2, 2 + Row, EmptyLine);
+        }
+    }
+
+    void AnimateMonsterHit(const std::vector<std::string>& ArtLines)
+    {
+        constexpr int HitOffsets[5] = { -5, 4, -3, 2, 0 };
+        for (const int Offset : HitOffsets)
+        {
+            ClearArtBlock();
+            WriteArtBlock(2, 2, TopHeight - 3, ArtLines, Offset);
+            Sleep(75);
+        }
+    }
+
+    void AnimateMonsterDefeat(const std::vector<std::string>& ArtLines)
+    {
+        constexpr int FlashFrameCount = 6;
+        for (int Frame = 0; Frame < FlashFrameCount; ++Frame)
+        {
+            ClearArtBlock();
+            if (Frame % 2 == 0)
+            {
+                WriteArtBlock(2, 2, TopHeight - 3, ArtLines);
+            }
+            Sleep(120);
+        }
+        ClearArtBlock();
+        Sleep(250);
+    }
+
+    std::vector<std::string> LoadArtAsset(const std::string& AssetName)
     {
         const std::vector<std::string> CandidatePaths = {
-            "Assets/BurgerQuestMain.txt",
-            "CH2-Text-RPG/Assets/BurgerQuestMain.txt",
-            "../../Assets/BurgerQuestMain.txt"
+            "Assets/" + AssetName,
+            "CH2-Text-RPG/Assets/" + AssetName,
+            "../../Assets/" + AssetName
         };
 
         std::ifstream File;
@@ -208,7 +290,7 @@ namespace
 
         if (!File.is_open())
         {
-            return { "TITLE ART NOT FOUND" };
+            return { "ASCII ART NOT FOUND: " + AssetName };
         }
 
         std::vector<std::string> Lines;
@@ -230,7 +312,163 @@ namespace
         {
             Lines.pop_back();
         }
+
+        std::size_t CommonIndent = std::string::npos;
+        for (const std::string& CurrentLine : Lines)
+        {
+            if (CurrentLine.empty())
+            {
+                continue;
+            }
+            CommonIndent = (std::min)(CommonIndent, CurrentLine.find_first_not_of(' '));
+        }
+        if (CommonIndent != std::string::npos && CommonIndent > 0)
+        {
+            for (std::string& CurrentLine : Lines)
+            {
+                CurrentLine.erase(0, (std::min)(CommonIndent, CurrentLine.size()));
+            }
+        }
         return Lines;
+    }
+
+    std::vector<std::string> LoadUiArtAsset(const std::string& AssetName)
+    {
+        const std::vector<std::string> SourceLines = LoadArtAsset(AssetName);
+        if (SourceLines.empty())
+        {
+            return SourceLines;
+        }
+
+        constexpr int TargetWidth = LeftWidth - 2;
+        constexpr int TargetHeight = TopHeight - 3;
+        std::vector<std::wstring> WideSourceLines;
+        int SourceWidth = 0;
+        for (const std::string& SourceLine : SourceLines)
+        {
+            WideSourceLines.push_back(Utf8ToWide(SourceLine));
+            SourceWidth = (std::max)(
+                SourceWidth,
+                static_cast<int>(WideSourceLines.back().size())
+            );
+        }
+
+        wchar_t Background = L' ';
+        for (const wchar_t Character : WideSourceLines.front())
+        {
+            if (Character != L' ')
+            {
+                Background = Character;
+                break;
+            }
+        }
+
+        std::vector<std::string> Result;
+        Result.reserve(TargetHeight);
+        for (int TargetRow = 0; TargetRow < TargetHeight; ++TargetRow)
+        {
+            int SourceRow = 0;
+            if (static_cast<int>(WideSourceLines.size()) > TargetHeight)
+            {
+                SourceRow = TargetRow * static_cast<int>(WideSourceLines.size()) /
+                    TargetHeight;
+            }
+            else
+            {
+                const int TopPadding =
+                    (TargetHeight - static_cast<int>(WideSourceLines.size())) / 2;
+                if (TargetRow < TopPadding ||
+                    TargetRow >= TopPadding + static_cast<int>(WideSourceLines.size()))
+                {
+                    Result.push_back(WideToUtf8(std::wstring(TargetWidth, Background)));
+                    continue;
+                }
+                SourceRow = TargetRow - TopPadding;
+            }
+
+            std::wstring Canvas(TargetWidth, Background);
+            const std::wstring& SourceLine = WideSourceLines[SourceRow];
+            if (SourceWidth <= TargetWidth)
+            {
+                const int StartX = (TargetWidth - SourceWidth) / 2;
+                for (std::size_t Index = 0;
+                    Index < SourceLine.size() && StartX + Index < Canvas.size();
+                    ++Index)
+                {
+                    Canvas[StartX + Index] = SourceLine[Index];
+                }
+            }
+            else
+            {
+                for (int TargetColumn = 0; TargetColumn < TargetWidth; ++TargetColumn)
+                {
+                    const int SourceColumn = TargetColumn * SourceWidth / TargetWidth;
+                    if (SourceColumn < static_cast<int>(SourceLine.size()))
+                    {
+                        Canvas[TargetColumn] = SourceLine[SourceColumn];
+                    }
+                }
+            }
+            Result.push_back(WideToUtf8(Canvas));
+        }
+        return Result;
+    }
+
+    std::vector<std::wstring> ScaleArtToCanvas(
+        const std::vector<std::string>& SourceLines,
+        int TargetWidth,
+        int TargetHeight
+    )
+    {
+        if (SourceLines.empty())
+        {
+            return std::vector<std::wstring>(
+                TargetHeight,
+                std::wstring(TargetWidth, L' ')
+            );
+        }
+
+        std::vector<std::wstring> WideSourceLines;
+        int SourceWidth = 0;
+        for (const std::string& SourceLine : SourceLines)
+        {
+            WideSourceLines.push_back(Utf8ToWide(SourceLine));
+            SourceWidth = (std::max)(
+                SourceWidth,
+                static_cast<int>(WideSourceLines.back().size())
+            );
+        }
+
+        wchar_t Background = L' ';
+        for (const wchar_t Character : WideSourceLines.front())
+        {
+            if (Character != L' ')
+            {
+                Background = Character;
+                break;
+            }
+        }
+
+        std::vector<std::wstring> Result(
+            TargetHeight,
+            std::wstring(TargetWidth, Background)
+        );
+        for (int TargetRow = 0; TargetRow < TargetHeight; ++TargetRow)
+        {
+            const int SourceRow = TargetRow *
+                static_cast<int>(WideSourceLines.size()) / TargetHeight;
+            const std::wstring& SourceLine = WideSourceLines[SourceRow];
+
+            for (int TargetColumn = 0; TargetColumn < TargetWidth; ++TargetColumn)
+            {
+                const int SourceColumn = TargetColumn * SourceWidth / TargetWidth;
+                if (SourceColumn < static_cast<int>(SourceLine.size()))
+                {
+                    Result[TargetRow][TargetColumn] = SourceLine[SourceColumn];
+                }
+            }
+        }
+        return Result;
     }
 
     std::string GetSkillTriggerText(const Skill& CurrentSkill)
@@ -258,45 +496,49 @@ UIManager::~UIManager()
 
 void UIManager::PrintTitleSplash() const
 {
-    const std::vector<std::string> TitleArt = LoadTitleArt();
-    const int VisibleLineCount = (std::min)(
-        static_cast<int>(TitleArt.size()),
-        TopHeight - 3
+    constexpr int FullScreenHeight = ScreenHeight + 1;
+    const std::vector<std::wstring> TitleArt = ScaleArtToCanvas(
+        LoadArtAsset("BurgerQuestMain.txt"),
+        ScreenWidth,
+        FullScreenHeight
     );
 
-    RenderLayout(
-        "BURGER QUEST",
-        std::vector<std::string>(VisibleLineCount),
-        {},
-        {},
-        "The game will begin shortly."
-    );
-
-    if (VisibleLineCount <= 0)
+    ClearConsole();
+    ConfigureConsoleWindow();
+    CONSOLE_CURSOR_INFO CursorInfo;
+    const HANDLE OutputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (GetConsoleCursorInfo(OutputHandle, &CursorInfo))
     {
-        Sleep(3000);
-        return;
+        CursorInfo.bVisible = FALSE;
+        SetConsoleCursorInfo(OutputHandle, &CursorInfo);
     }
+    Sleep(5000);
 
-    const DWORD FrameDelay = 3000 / VisibleLineCount;
-    const std::wstring EmptyArtLine(LeftWidth - 2, L' ');
+    const DWORD FrameDelay = 3000 / FullScreenHeight;
+    const std::wstring EmptyLine(ScreenWidth, L' ');
     for (int FrameLineCount = 1;
-        FrameLineCount <= VisibleLineCount;
+        FrameLineCount <= FullScreenHeight;
         ++FrameLineCount)
     {
-        for (int Row = 0; Row < TopHeight - 3; ++Row)
+        for (int Row = 0; Row < FullScreenHeight; ++Row)
         {
-            WriteWideAt(2, 2 + Row, EmptyArtLine);
+            WriteWideAt(0, Row, EmptyLine);
         }
 
-        const int StartY = 2 + VisibleLineCount - FrameLineCount;
+        const int StartY = FullScreenHeight - FrameLineCount;
         for (int Row = 0; Row < FrameLineCount; ++Row)
         {
-            WriteWideAt(2, StartY + Row, Utf8ToWide(TitleArt[Row]));
+            WriteWideAt(0, StartY + Row, TitleArt[Row]);
         }
         Sleep(FrameDelay);
     }
     Sleep(1000);
+
+    if (GetConsoleCursorInfo(OutputHandle, &CursorInfo))
+    {
+        CursorInfo.bVisible = TRUE;
+        SetConsoleCursorInfo(OutputHandle, &CursorInfo);
+    }
 }
 
 void UIManager::RenderLayout(
@@ -391,7 +633,7 @@ int UIManager::PrintMenu() const
 {
     RenderLayout(
         "MAIN MENU",
-        {},
+        LoadUiArtAsset("UI/CampFire.txt"),
         {
             "1. 전투",
             "2. 인벤토리",
@@ -420,7 +662,7 @@ int UIManager::PrintInventory(const Inventory& inventory) const
 
     RenderLayout(
         "INVENTORY",
-        {},
+        LoadUiArtAsset("UI/Inventory.txt"),
         Options,
         { "보유 중인 아이템과 수량입니다." },
         "확인할 아이템 번호를 입력하세요."
@@ -443,7 +685,7 @@ int UIManager::PrintRecipes(
 
     RenderLayout(
         "RECIPES",
-        {},
+        LoadUiArtAsset("UI/Cook.txt"),
         Options,
         { "제작할 요리를 선택하세요." },
         "레시피 번호를 입력하세요."
@@ -478,7 +720,7 @@ int UIManager::PrintSelectedRecipe(
 
     RenderLayout(
         recipe->Name,
-        {},
+        LoadUiArtAsset("UI/Cook.txt"),
         { "1. 제작", "0. 돌아가기" },
         Logs,
         "작업을 선택하세요."
@@ -490,7 +732,7 @@ void UIManager::PrintInsufficientIngredients() const
 {
     RenderLayout(
         "COOKING",
-        {},
+        LoadUiArtAsset("UI/Cook.txt"),
         { "0. 레시피로 돌아가기" },
         { "재료가 부족합니다.", "레시피 선택 화면으로 돌아갑니다." },
         "계속하려면 Enter를 누르세요."
@@ -518,7 +760,13 @@ void UIManager::PrintRecipeSuccess(
         Logs.push_back("다음 스테이지가 열렸습니다!");
     }
 
-    RenderLayout("COOKING COMPLETE", {}, {}, Logs, "계속하려면 Enter를 누르세요.");
+    RenderLayout(
+        "COOKING COMPLETE",
+        LoadUiArtAsset("UI/Cook.txt"),
+        {},
+        Logs,
+        "계속하려면 Enter를 누르세요."
+    );
     WaitForContinue();
 }
 
@@ -534,7 +782,13 @@ int UIManager::PrintShop(const std::vector<ShopItem>& shopItems)
     }
     Options.push_back("0. 돌아가기");
 
-    RenderLayout("SHOP", {}, Options, { "구매할 아이템을 선택하세요." }, "상품 번호를 입력하세요.");
+    RenderLayout(
+        "SHOP",
+        LoadUiArtAsset("UI/Shop.txt"),
+        Options,
+        { "구매할 아이템을 선택하세요." },
+        "상품 번호를 입력하세요."
+    );
     const int Choice = ReadChoice(0, static_cast<int>(shopItems.size()));
     if (Choice == 0 || PrintSelectedShopItem(shopItems[Choice - 1]) != 1)
     {
@@ -547,7 +801,7 @@ int UIManager::PrintSelectedShopItem(const ShopItem& shopItem)
 {
     RenderLayout(
         "SHOP ITEM",
-        {},
+        LoadUiArtAsset("UI/Shop.txt"),
         { "1. 구매", "0. 돌아가기" },
         {
             "상품: " + Item::GetNameById(shopItem.id),
@@ -562,7 +816,7 @@ void UIManager::PrintShopPurchaseResult(bool IsPurchased, const Player& player) 
 {
     RenderLayout(
         "SHOP RESULT",
-        {},
+        LoadUiArtAsset("UI/Shop.txt"),
         {},
         {
             IsPurchased ? "구매가 완료되었습니다." : "구매할 수 없습니다. 골드를 확인해주세요.",
@@ -596,7 +850,13 @@ int UIManager::PrintSkillSelection(const Player& player, const Monster& monster)
         );
     }
 
-    RenderLayout("SKILL SELECT", {}, Options, Logs, "사용할 스킬을 선택하세요.");
+    RenderLayout(
+        "SKILL SELECT",
+        LoadUiArtAsset("UI/Skill.txt"),
+        Options,
+        Logs,
+        "사용할 스킬을 선택하세요."
+    );
     const int Selection = ReadChoice(0, static_cast<int>(Skills.size()));
     return Selection == 0 ? 0 : Skills[Selection - 1].GetId();
 }
@@ -621,21 +881,41 @@ void UIManager::PrintBossIntroStory(const Monster& boss) const
 
 void UIManager::PrintEndingStory() const
 {
+    const std::vector<std::string> StoryLines = {
+        "감자 대왕이 남긴 감자로 최종의 감자튀김을 완성했다.",
+        "바삭한 감자튀김을 한 입 베어 물었다.",
+        "...",
+        "\"무언가 부족하다...\"",
+        "다시 한 입을 먹었지만, 허전함은 사라지지 않았다.",
+        "\"목이 마르다...\"",
+        "멀리서 톡 쏘는 기포 소리가 들려온다...",
+        "To be continued..."
+    };
+    constexpr DWORD StoryDelays[] = {
+        1400,
+        1400,
+        1200,
+        1600,
+        1400,
+        1800,
+        1800,
+        0
+    };
+
     RenderLayout(
         "ENDING",
         {},
         {},
-        {
-            "감자 대왕이 남긴 감자로 최종의 감자튀김을 완성했다.",
-            "바삭한 감자튀김을 한 입 베어 물었다.",
-            "...",
-            "\"무언가 부족하다...\"",
-            "\"목이 마르다...\"",
-            "멀리서 톡 쏘는 기포 소리가 들려온다...",
-            "To be continued..."
-        },
-        "게임을 마치려면 Enter를 누르세요."
+        {},
+        "이야기가 끝날 때까지 기다려주세요."
     );
+
+    for (std::size_t Index = 0; Index < StoryLines.size(); ++Index)
+    {
+        WriteAt(2, TopHeight + 2 + static_cast<int>(Index), StoryLines[Index]);
+        Sleep(StoryDelays[Index]);
+    }
+
     WaitForContinue();
 }
 
@@ -649,11 +929,25 @@ int UIManager::PrintBattleLog(
     if (!BattleLogs.empty())
     {
         MonsterName = BattleLogs.front().MonsterName;
-        ArtLines = { Monster::GetAsciiArtById(BattleLogs.front().MonsterId) };
+        ArtLines = LoadArtAsset(
+            Monster::GetAsciiArtAssetNameById(BattleLogs.front().MonsterId)
+        );
     }
 
     for (const BattleInfo& Log : BattleLogs)
     {
+        RenderLayout(
+            "BATTLE - " + MonsterName,
+            ArtLines,
+            { "자동 전투 진행 중" },
+            {
+                std::to_string(Log.Turn) + "번째 턴",
+                "플레이어 공격: " + std::to_string(Log.PlayerAttackDamage) + " 피해"
+            },
+            "몬스터를 공격했습니다."
+        );
+        AnimateMonsterHit(ArtLines);
+
         RenderLayout(
             "BATTLE - " + MonsterName,
             ArtLines,
@@ -667,12 +961,18 @@ int UIManager::PrintBattleLog(
             },
             "전투가 자동으로 진행됩니다."
         );
-        Sleep(700);
+        Sleep(650);
+    }
+
+    const bool IsVictory = Result.first == BattleResult::Win;
+    if (IsVictory)
+    {
+        AnimateMonsterDefeat(ArtLines);
     }
 
     RenderLayout(
         "BATTLE RESULT",
-        ArtLines,
+        IsVictory ? std::vector<std::string>() : ArtLines,
         { "0. 계속" },
         {
             Result.first == BattleResult::Win

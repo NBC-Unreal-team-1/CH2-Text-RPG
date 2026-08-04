@@ -172,142 +172,36 @@ int Monster::GetId() const
     return FirstMonsterId + static_cast<int>(MonsterId);
 }
 
-const std::string& Monster::GetAsciiArtById(int MonsterId)
+std::string Monster::GetAsciiArtAssetNameById(int MonsterId)
 {
-    static const std::string LettuceArt = R"ART(
-       .-~~~~-.
-    .-'  .--.  '-.
-   /  .-( () )-.  \
-  (  (   '--'   )  )
-   '._'-.____.-'_.'
-      '--------')ART";
-
-    static const std::string OnionArt = R"ART(
-         /\
-        /  \
-      .'    '.
-     /  o  o  \
-    |    --    |
-     \  ____  /
-      '------')ART";
-
-    static const std::string PickleArt = R"ART(
-       __________
-     /  o  o  o  \
-    / o  .----. o \
-   |  o / ^  ^ \  |
-   | o  \  --  / o|
-    \__o_'----'_o_/)ART";
-
-    static const std::string TomatoArt = R"ART(
-        \  |  /
-      ---\ | /---
-         \|/
-      .-~~~~~-.
-     /  o   o  \
-    |     ^     |
-     \  '---'  /
-      '-------')ART";
-
-    static const std::string KetchupArt = R"ART(
-        _______
-       /_______\
-       |  RED  |
-      /|       |\
-     / |  o o  | \
-    |  |   >   |  |
-     \_|__===__|_/)ART";
-
-    static const std::string MayonnaiseArt = R"ART(
-        _______
-       /  MAYO \
-      /_________\
-      |  .---.  |
-      | ( o o ) |
-      |  \_-_/  |
-      '---------')ART";
-
-    static const std::string BaconArt = R"ART(
-      __/\/\/\/\__
-     /  /\/\/\/\  \
-    |  |  o  o  |  |
-    |  |   __   |  |
-     \  \/\/\/\/  /
-      '--/\/\/\--')ART";
-
-    static const std::string CheeseArt = R"ART(
-          /|
-         / |
-        / o|
-       /___|
-      | o  |
-      |  o |
-      |____|)ART";
-
-    static const std::string BreadArt = R"ART(
-       .----------.
-      /  .------.  \
-     /  / o  o  \  \
-    |  |    ^    |  |
-    |  |  '---'  |  |
-     \  '------'  /
-      '----------')ART";
-
-    static const std::string PattyArt = R"ART(
-       .----------.
-      /~~~~~~~~~~~~\
-     |  =========  |
-     |   o      o   |
-     |      __      |
-      \============/
-       '----------')ART";
-
-    static const std::string PotatoBossArt = R"ART(
-          _/\_
-       .-'____'-.
-      /  / /\ \  \
-     |  |  ><  |  |
-     |  | \__/ |  |
-      \  \____/  /
-       '._||||_.'
-        /_||||_\)ART";
-
-    static const std::string UnknownArt = R"ART(
-       .-------.
-      /  ?   ?  \
-     |     ?     |
-      \  _____  /
-       '-------')ART";
-
     switch (MonsterId)
     {
     case 501:
-        return LettuceArt;
+        return "Monster/Lettuce.txt";
     case 502:
-        return OnionArt;
+        return "Monster/Onion.txt";
     case 503:
-        return PickleArt;
+        return "Monster/Pickle.txt";
     case 504:
-        return TomatoArt;
+        return "Monster/Tomato.txt";
     case 505:
-        return KetchupArt;
+        return "Monster/Ketchup.txt";
     case 506:
-        return MayonnaiseArt;
+        return "Monster/Mayonnaise.txt";
     case 507:
-        return BaconArt;
+        return "Monster/Bacon.txt";
     case 508:
-        return CheeseArt;
+        return "Monster/Cheese.txt";
     case 509:
-        return BreadArt;
+        return "Monster/Bread.txt";
     case 510:
-        return PattyArt;
+        return "Monster/Patty.txt";
     case 511:
-        return PotatoBossArt;
+        return "Monster/PotatoBoss.txt";
     default:
-        return UnknownArt;
+        return "Monster/Unknown.txt";
     }
 }
-
 MonsterType Monster::GetMonsterId() const
 {
     return MonsterId;
