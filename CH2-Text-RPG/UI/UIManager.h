@@ -1,4 +1,4 @@
-癤�#pragma once
+#pragma once
 
 #include <string>
 #include <utility>
@@ -15,7 +15,6 @@
 #include "../Inventory/Item.h"
 #include "../Recipe/RecipeManager.h"
 #include "../Shop/ShopItem.h"
-#include "../UI/ScreenData.h"
 
 class UIManager
 {
@@ -23,7 +22,7 @@ public:
     UIManager();
     ~UIManager();
 
-    int GetInput(ScreenData& screen, int min, int max) const;
+    void PrintTitleSplash() const;
     void SetupPlayerInfo(Player& player);
     int PrintMenu() const;
     int PrintInventory(const Inventory& inventory) const;
@@ -53,7 +52,15 @@ public:
     int PrintBattleResult(const Player& player, const Monster& monster) const;
     
 protected:
+
 private:
-    std::string border = "========================================";
-    std::string emptyLine = " ";
+    void RenderLayout(
+        const std::string& Title,
+        const std::vector<std::string>& ArtLines,
+        const std::vector<std::string>& Options,
+        const std::vector<std::string>& Logs,
+        const std::string& Prompt
+    ) const;
+    int ReadChoice(int Min, int Max) const;
+    void WaitForContinue(const std::string& Prompt = "계속하려면 Enter를 누르세요.") const;
 };

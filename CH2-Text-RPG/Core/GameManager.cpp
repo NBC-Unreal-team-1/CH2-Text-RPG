@@ -17,6 +17,7 @@ GameManager::~GameManager()
 
 void GameManager::Run()
 {
+    UI.PrintTitleSplash();
     InitializePlayer();
     RunTutorial();
     GameLoop();
