@@ -14,6 +14,7 @@
 #include "../Character/Monster.h"
 #include "../Inventory/Item.h"
 #include "../Recipe/RecipeManager.h"
+#include "../Shop/ShopManager.h"
 #include "../UI/ScreenData.h"
 
 class UIManager
@@ -28,6 +29,8 @@ public:
     int PrintInventory(const Inventory& inventory) const;
     int PrintRecipes(const RecipeManager& recipes, const Inventory& inventory) const;
     int PrintSelectedRecipe(const Recipe* recipe, const Inventory& inventory) const;
+    int PrintShop(const ShopManager& shop);
+    int PrintSelectedShopItem(const ShopItem& shopItem);
     int PrintBattleLog(
         const std::pair<BattleResult, std::vector<BattleInfo>>& Result
     ) const;

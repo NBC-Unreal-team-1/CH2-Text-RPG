@@ -253,9 +253,79 @@ int UIManager::PrintSelectedRecipe(const Recipe* recipe, const Inventory& invent
 	{
 		screen.PrintLine(i);
 	}
+	
+	return GetInput(screen, menuMin, menuMax);
+}
 
-	GetInput(screen, menuMin, menuMax);
-	return -1;
+int UIManager::PrintShop(const ShopManager& shop)
+{
+	int menuMin = 0;
+	int menuMax;
+	ScreenData screen;
+	std::string temp;
+	screen.AddLine(border, LineType::out);
+	screen.AddLine("상점", LineType::out);
+	screen.AddLine(border, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	for (size_t i = 0; i < shop.GetShopItems().size(); ++i)
+	{
+		temp = std::to_string(i + 1) + ". " + Item::GetNameById(shop.GetShopItems()[i].id) +
+			" : " + std::to_string(shop.GetShopItems()[i].price) + "골드";
+		screen.AddLine(temp, LineType::out);
+	}
+	screen.AddLine("0 : exit", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine(border, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
+	menuMax = shop.GetShopItems().size();
+
+	ClearConsole();
+	for (int i = 0; i < screen.GetDataSize(); ++i)
+	{
+		screen.PrintLine(i);
+	}
+
+	if (!screen.GetHasInput())
+	{
+		return -1;
+	}
+
+	int choice = GetInput(screen, menuMin, menuMax);
+	if (choice != 0)
+	{
+		PrintSelectedShopItem(shop.GetShopItems()[choice - 1]);
+	}
+
+	return choice;
+}
+
+int UIManager::PrintSelectedShopItem(const ShopItem& shopItem)
+{
+	ScreenData screen;
+	int menuMin = 0;
+	int menuMax = 1;
+	std::string temp;
+	
+	screen.AddLine(border, LineType::out);
+	screen.AddLine("상점", LineType::out);
+	screen.AddLine(border, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	temp = Item::GetNameById(shopItem.id) + "\n가격: " + std::to_string(shopItem.price);
+	screen.AddLine(temp, LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine("1: 구매", LineType::out);
+	screen.AddLine("0 : exit", LineType::out);
+	screen.AddLine(emptyLine, LineType::out);
+	screen.AddLine(border, LineType::out);
+	screen.AddLine("Enter : ", LineType::in);
+
+	ClearConsole();
+	for (int i = 0; i < screen.GetDataSize(); ++i)
+	{
+		screen.PrintLine(i);
+	}
+
+	return GetInput(screen, menuMin, menuMax);
 }
 
 void SetBattleLog(const BattleInfo& currentLog, ScreenData& data, std::string border, std::string emptyLine)
